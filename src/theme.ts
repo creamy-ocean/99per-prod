@@ -13,6 +13,33 @@ const theme = extendTheme({
     },
   },
   components: {
+    Heading: {
+      variants: {
+        typewriter: {
+          color: "white",
+          fontWeight: "bold",
+        },
+        logo: {
+          fontFamily: "Luckiest Guy",
+          color: "white",
+          textShadow: "3px 3px #008BE8",
+        },
+      },
+    },
+    Text: {
+      variants: {
+        desc: {
+          color: "white",
+          letterSpacing: "-1px",
+          fontWeight: "bold",
+        },
+        impact: {
+          position: "fixed",
+          top: "18rem",
+          left: "37.5rem",
+        },
+      },
+    },
     Button: {
       sizes: {
         sm: {
@@ -30,33 +57,6 @@ const theme = extendTheme({
       },
       defaultProps: {
         colorScheme: "brand",
-      },
-    },
-    Text: {
-      variants: {
-        desc: {
-          color: "white",
-          letterSpacing: "-1px",
-          fontWeight: "bold",
-        },
-        impact: {
-          position: "fixed",
-          top: "18rem",
-          left: "37.5rem",
-        },
-      },
-    },
-    Heading: {
-      variants: {
-        typewriter: {
-          color: "white",
-          fontWeight: "bold",
-        },
-        logo: {
-          fontFamily: "Luckiest Guy",
-          color: "white",
-          textShadow: "3px 3px #5096F2",
-        },
       },
     },
   },

@@ -1,4 +1,6 @@
-import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { IoArrowForwardOutline } from "react-icons/io5";
+import { Link } from "react-router-dom";
 import Typewriter from "typewriter-effect";
 
 const Home = () => {
@@ -48,6 +50,11 @@ const Home = () => {
           <Text variant="desc" fontSize="2xl" mt="8">
             나와 딱 맞는 친구를 찾아보세요
           </Text>
+          <Link to="join">
+            <Button rightIcon={<IoArrowForwardOutline />} mt="8">
+              시작하기
+            </Button>
+          </Link>
         </Flex>
         <Flex direction="column" justify="center">
           <Image

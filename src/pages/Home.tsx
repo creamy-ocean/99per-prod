@@ -1,7 +1,22 @@
 import { Box, Button, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { Variants, motion } from "framer-motion";
 import { IoArrowForwardOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import Typewriter from "typewriter-effect";
+
+const motionVariants: Variants = {
+  initial: {
+    y: 0,
+  },
+  animate: {
+    y: 10,
+    transition: {
+      repeat: Infinity,
+      duration: 1.25,
+      repeatType: "mirror",
+    },
+  },
+};
 
 const Home = () => {
   return (
@@ -58,9 +73,13 @@ const Home = () => {
         </Flex>
         <Flex direction="column" justify="center">
           <Image
+            as={motion.img}
             src="src/assets/iPhone_mockup.png"
             alt="99프로 사용 예시 이미지"
             w="36.5rem"
+            variants={motionVariants}
+            initial="initial"
+            animate="animate"
           />
         </Flex>
       </Flex>

@@ -74,9 +74,9 @@ const Home = () => {
         <Flex direction="column" justify="center">
           <Image
             as={motion.img}
-            src="src/assets/iPhone_mockup.png"
+            src="public/assets/iPhone_mockup.png"
             alt="99프로 사용 예시 이미지"
-            w="36.5rem"
+            w="32rem"
             variants={motionVariants}
             initial="initial"
             animate="animate"

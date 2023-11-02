@@ -1,5 +1,6 @@
 import ErrorPage from "@/pages/ErrorPage";
 import Home from "@/pages/Home";
+import Join from "@/pages/Join";
 import Root from "@/pages/Root";
 import { createBrowserRouter } from "react-router-dom";
 
@@ -12,6 +13,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: "/join",
+        element: <Join />,
       },
     ],
   },

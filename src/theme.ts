@@ -38,6 +38,10 @@ const theme = extendTheme({
           top: "18rem",
           left: "37.5rem",
         },
+        "google-login": {
+          fontFamily: "Roboto",
+          fontSize: "0.9rem",
+        },
       },
     },
     Button: {

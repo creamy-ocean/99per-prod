@@ -31,7 +31,7 @@ const Login = () => {
           onClick={() => login("google")}
         >
           <Flex alignItems="center">
-            <Image ml="2" src="public/assets/google_logo.png" height="1.5rem" />
+            <Image ml="2" src="/assets/google_logo.png" height="1.5rem" />
             <Text variant="google-login" ml="5">
               Google 로그인
             </Text>
@@ -49,7 +49,7 @@ const Login = () => {
           onClick={() => login("twitter")}
         >
           <Flex alignItems="center">
-            <Image ml="2" src="public/assets/x_logo.png" height="1.2rem" />
+            <Image ml="2" src="/assets/x_logo.png" height="1.2rem" />
             <Text color="white" variant="google-login" ml="7">
               X 로그인
             </Text>

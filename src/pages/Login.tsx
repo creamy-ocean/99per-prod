@@ -1,6 +1,7 @@
+import { login } from "@/database/firebase";
 import { Card, Flex, Heading, Image, Text } from "@chakra-ui/react";
 
-const Join = () => {
+const Login = () => {
   return (
     <Flex
       justify="center"
@@ -22,7 +23,13 @@ const Join = () => {
         <Text fontSize="lg" mt="1rem">
           다음 계정으로 로그인 하세요
         </Text>
-        <Card mt="2rem" w="11.5rem" p="0.7rem 0.5rem" cursor="pointer">
+        <Card
+          mt="2rem"
+          w="11.5rem"
+          p="0.7rem 0.5rem"
+          cursor="pointer"
+          onClick={login}
+        >
           <Flex alignItems="center">
             <Image ml="2" src="public/assets/google_logo.png" height="1.5rem" />
             <Text variant="google-login" ml="5">
@@ -47,34 +54,8 @@ const Join = () => {
             </Text>
           </Flex>
         </Card>
-        {/* <Card
-          mt="1rem"
-          w="15rem"
-          p="0.5rem"
-          backgroundColor="black"
-          cursor="pointer"
-        >
-          <Flex alignItems="center">
-            <Image ml="3" src="public/assets/x_logo.png" height="1.2rem" />
-            <Text ml="5" color="white">
-              X 계정으로 로그인
-            </Text>
-          </Flex>
-        </Card>
-        <Card
-          mt="1rem"
-          w="15rem"
-          p="0.5rem"
-          backgroundColor="#FDDC3F"
-          cursor="pointer"
-        >
-          <Flex>
-            <Image ml="2" src="public/assets/kakao_login.png" width="1.5rem" />
-            <Text ml="4">카카오 계정으로 로그인</Text>
-          </Flex>
-        </Card>  */}
       </Flex>
     </Flex>
   );
 };
-export default Join;
+export default Login;

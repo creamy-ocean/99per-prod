@@ -1,6 +1,7 @@
+import Certify from "@/pages/Certify";
 import ErrorPage from "@/pages/ErrorPage";
 import Home from "@/pages/Home";
-import Join from "@/pages/Join";
+import Login from "@/pages/Login";
 import Root from "@/pages/Root";
 import { createBrowserRouter } from "react-router-dom";
 
@@ -16,7 +17,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/join",
-        element: <Join />,
+        element: <Login />,
+      },
+      {
+        path: "/certify",
+        element: <Certify />,
       },
     ],
   },

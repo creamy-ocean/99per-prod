@@ -4,6 +4,7 @@ import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Root from "@/pages/Root";
 import { createBrowserRouter } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/join",
-        element: <Login />,
+        element: (
+          <ProtectedRoute certRequired>
+            <Login />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/certify",

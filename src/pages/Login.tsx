@@ -28,7 +28,7 @@ const Login = () => {
           w="11.5rem"
           p="0.7rem 0.5rem"
           cursor="pointer"
-          onClick={login}
+          onClick={() => login("google")}
         >
           <Flex alignItems="center">
             <Image ml="2" src="public/assets/google_logo.png" height="1.5rem" />
@@ -37,15 +37,16 @@ const Login = () => {
             </Text>
           </Flex>
         </Card>
-        <Card mt="1rem" cursor="pointer">
+        {/* <Card mt="1rem" cursor="pointer">
           <Image src="public/assets/kakao_login.png" />
-        </Card>
+        </Card> */}
         <Card
           mt="1rem"
           w="11.5rem"
           p="0.7rem 0.5rem"
           cursor="pointer"
           backgroundColor="black"
+          onClick={() => login("twitter")}
         >
           <Flex alignItems="center">
             <Image ml="2" src="public/assets/x_logo.png" height="1.2rem" />

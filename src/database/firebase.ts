@@ -1,7 +1,9 @@
 import { config } from "@/utils/config";
 import { initializeApp } from "firebase/app";
 import {
+  AuthProvider,
   GoogleAuthProvider,
+  TwitterAuthProvider,
   getAuth,
   onAuthStateChanged,
   signInWithPopup,
@@ -16,13 +18,23 @@ const firebaseConfig = {
   projectId: config.firebase.projectId,
 };
 
+interface Providers {
+  [key: string]: AuthProvider;
+}
+
 const app = initializeApp(firebaseConfig);
-const provider = new GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider();
+const twitterProvider = new TwitterAuthProvider();
 const auth = getAuth();
 const database = getDatabase(app);
 
-export const login = () => {
-  signInWithPopup(auth, provider)
+const providers: Providers = {
+  google: googleProvider,
+  twitter: twitterProvider,
+};
+
+export const login = (platform: string) => {
+  signInWithPopup(auth, providers[platform])
     .then((userCredential) => {
       addUserState(userCredential.user.uid, "joined");
     })

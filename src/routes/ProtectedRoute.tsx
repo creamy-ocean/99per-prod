@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children, certRequired }: Props) => {
         user.userState === "joined" ? (
           <Navigate to="/certify" replace={true} />
         ) : (
-          <Navigate to="/" replace={true} />
+          <Navigate to="/list" replace={true} />
         )
       ) : (
         children

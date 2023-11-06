@@ -1,6 +1,7 @@
 import Certify from "@/pages/Certify";
 import ErrorPage from "@/pages/ErrorPage";
 import Home from "@/pages/Home";
+import List from "@/pages/List";
 import Login from "@/pages/Login";
 import Root from "@/pages/Root";
 import { createBrowserRouter } from "react-router-dom";
@@ -12,10 +13,7 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
+      { index: true, element: <Home /> },
       {
         path: "/join",
         element: (
@@ -24,10 +22,8 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: "/certify",
-        element: <Certify />,
-      },
+      { path: "/certify", element: <Certify /> },
+      { path: "/list", element: <List /> },
     ],
   },
 ]);

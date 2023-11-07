@@ -1,7 +1,7 @@
 import Certify from "@/pages/Certify";
 import ErrorPage from "@/pages/ErrorPage";
+import Friends from "@/pages/Friends";
 import Home from "@/pages/Home";
-import List from "@/pages/List";
 import Login from "@/pages/Login";
 import Root from "@/pages/Root";
 import { createBrowserRouter } from "react-router-dom";
@@ -23,7 +23,7 @@ const router = createBrowserRouter([
         ),
       },
       { path: "/certify", element: <Certify /> },
-      { path: "/list", element: <List /> },
+      { path: "/friends", element: <Friends /> },
     ],
   },
 ]);

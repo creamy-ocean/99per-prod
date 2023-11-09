@@ -5,6 +5,7 @@ import {
   CheckboxGroup,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   FormLabel,
   HStack,
@@ -16,14 +17,59 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { array, object, string } from "yup";
+
+const INTRO_REG_EXP = /^((?![%=*><]).)*$/g;
+
+const formSchema = object({
+  game: string().required(),
+  interest: array()
+    .of(string())
+    .ensure()
+    .compact()
+    .min(1, "하나 이상의 관심사를 선택해주세요")
+    .required(),
+  style: array()
+    .of(string())
+    .ensure()
+    .compact()
+    .min(1, "하나 이상의 스타일을 선택해주세요")
+    .required(),
+  intro: string()
+    .min(1, "최소 한 글자 이상 입력해주세요")
+    .matches(INTRO_REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
+    .max(256, "최대 256자까지 입력 가능합니다")
+    .required(),
+}).required();
 
 const NewProfile = () => {
   const [currTab, setCurrTab] = useState<string>("친구");
+  const {
+    handleSubmit,
+    register,
+    formState: { errors, isSubmitting },
+    clearErrors,
+    reset,
+  } = useForm({
+    resolver: yupResolver(formSchema),
+  });
 
   const changeTab = (e: React.MouseEvent<HTMLButtonElement>) => {
     const eventTarget = e.target as HTMLButtonElement;
     setCurrTab(eventTarget.innerText);
+    clearErrors();
+    reset();
+  };
+
+  const onSubmit = () => {
+    // Todo
+  };
+
+  const onTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    e.key === "Enter" && e.preventDefault();
   };
 
   return (
@@ -47,177 +93,208 @@ const NewProfile = () => {
             <Tab onClick={changeTab}>길드</Tab>
           </TabList>
         </Tabs>
-        <FormControl
-          sx={{
-            select: { fontSize: "0.9rem" },
-            option: {
-              fontSize: "0.9rem",
-            },
-          }}
-        >
-          <FormLabel fontWeight="bold" color="#555">
-            게임
-          </FormLabel>
-          <Select>
-            <option>리그 오브 레전드</option>
-            <option>메이플스토리</option>
-            <option>배틀그라운드</option>
-          </Select>
-          <FormHelperText>프로필을 등록할 게임을 선택해주세요</FormHelperText>
-        </FormControl>
-        <FormControl
-          sx={{
-            span: {
-              fontSize: "0.9rem",
-            },
-          }}
-        >
-          <FormLabel mt="8" fontWeight="bold" color="#555">
-            관심사
-          </FormLabel>
-          <CheckboxGroup>
-            <HStack spacing="24px">
-              <Checkbox value="rank">
-                <Text>랭크/티어</Text>
-              </Checkbox>
-              <Checkbox value="level">
-                <Text>레벨/스펙</Text>
-              </Checkbox>
-              <Checkbox value="deco">
-                <Text>코디/꾸미기</Text>
-              </Checkbox>
-            </HStack>
-            <HStack spacing="11px" mt="2">
-              <Checkbox value="boss">
-                <Text>보스/레이드</Text>
-              </Checkbox>
-              <Checkbox value="collect">
-                <Text>수집/컬렉션</Text>
-              </Checkbox>
-              <Checkbox value="hunt">
-                <Text>사냥/채집</Text>
-              </Checkbox>
-            </HStack>
-          </CheckboxGroup>
-          <FormHelperText>
-            {currTab === "친구"
-              ? "나"
-              : currTab === "파티"
-              ? "우리 파티"
-              : "우리 길드"}
-            의 관심사를 선택해주세요
-          </FormHelperText>
-        </FormControl>
-        <FormControl
-          sx={{
-            span: {
-              fontSize: "0.9rem",
-            },
-          }}
-        >
-          {currTab === "길드" ? (
-            <>
-              <FormLabel mt="8" fontWeight="bold" color="#555">
-                길드 스타일
-              </FormLabel>
-              <CheckboxGroup>
-                <HStack spacing="24px">
-                  <Checkbox value="friendship">
-                    <Text>친목</Text>
-                  </Checkbox>
-                  <Checkbox value="solo">
-                    <Text>솔플</Text>
-                  </Checkbox>
-                  <Checkbox value="voice">
-                    <Text>보이스</Text>
-                  </Checkbox>
-                  <Checkbox value="chat">
-                    <Text>채팅만</Text>
-                  </Checkbox>
-                </HStack>
-              </CheckboxGroup>
-              <FormHelperText>우리 길드의 스타일을 선택해주세요</FormHelperText>
-            </>
-          ) : (
-            <>
-              <FormLabel mt="8" fontWeight="bold" color="#555">
-                플레이 스타일
-              </FormLabel>
-              <CheckboxGroup>
-                <HStack spacing="24px">
-                  <Checkbox value="attacker">
-                    <Text>돌격형</Text>
-                  </Checkbox>
-                  <Checkbox value="defender">
-                    <Text>방어형</Text>
-                  </Checkbox>
-                  <Checkbox value="serious">
-                    <Text>빡겜</Text>
-                  </Checkbox>
-                  <Checkbox value="casual">
-                    <Text>즐겜</Text>
-                  </Checkbox>
-                </HStack>
-                <HStack spacing="24px" mt="2">
-                  <Checkbox value="voice">
-                    <Text>보이스</Text>
-                  </Checkbox>
-                  <Checkbox value="chat">
-                    <Text>채팅만</Text>
-                  </Checkbox>
-                  <Checkbox value="interact">
-                    <Text>소통</Text>
-                  </Checkbox>
-                  <Checkbox value="solo">
-                    <Text>솔플</Text>
-                  </Checkbox>
-                </HStack>
-              </CheckboxGroup>
+        <form id="profile-form" onSubmit={handleSubmit(onSubmit)}>
+          <FormControl
+            sx={{
+              select: { fontSize: "0.9rem" },
+              option: {
+                fontSize: "0.9rem",
+              },
+            }}
+          >
+            <FormLabel fontWeight="bold" color="#555">
+              게임
+            </FormLabel>
+            <Select>
+              <option>리그 오브 레전드</option>
+              <option>메이플스토리</option>
+              <option>배틀그라운드</option>
+            </Select>
+            <FormHelperText>프로필을 등록할 게임을 선택해주세요</FormHelperText>
+          </FormControl>
+          <FormControl
+            sx={{
+              span: {
+                fontSize: "0.9rem",
+              },
+            }}
+            isInvalid={!!errors?.interest}
+          >
+            <FormLabel mt="8" fontWeight="bold" color="#555">
+              관심사
+            </FormLabel>
+            <CheckboxGroup>
+              <HStack spacing="24px">
+                <Checkbox value="rank" {...register("interest")}>
+                  <Text>랭크/티어</Text>
+                </Checkbox>
+                <Checkbox value="level" {...register("interest")}>
+                  <Text>레벨/스펙</Text>
+                </Checkbox>
+                <Checkbox value="deco" {...register("interest")}>
+                  <Text>코디/꾸미기</Text>
+                </Checkbox>
+              </HStack>
+              <HStack spacing="11px" mt="2">
+                <Checkbox value="boss" {...register("interest")}>
+                  <Text>보스/레이드</Text>
+                </Checkbox>
+                <Checkbox value="collect" {...register("interest")}>
+                  <Text>수집/컬렉션</Text>
+                </Checkbox>
+                <Checkbox value="hunt" {...register("interest")}>
+                  <Text>사냥/채집</Text>
+                </Checkbox>
+              </HStack>
+            </CheckboxGroup>
+            {errors?.interest ? (
+              <FormErrorMessage>{errors.interest.message}</FormErrorMessage>
+            ) : (
               <FormHelperText>
-                {currTab === "친구" ? "나" : "우리 파티"}의 플레이 스타일을
-                선택해주세요
+                {currTab === "친구"
+                  ? "나"
+                  : currTab === "파티"
+                  ? "우리 파티"
+                  : "우리 길드"}
+                의 관심사를 선택해주세요
               </FormHelperText>
-            </>
-          )}
-        </FormControl>
-        <FormControl
-          sx={{
-            textarea: {
-              fontSize: "0.9rem",
-            },
-          }}
-        >
-          <FormLabel mt="8" fontWeight="bold" color="#555">
-            {currTab === "친구" ? "자기" : currTab === "파티" ? "파티" : "길드"}{" "}
-            소개
-          </FormLabel>
-          <Textarea
-            placeholder={
-              currTab === "친구"
-                ? "자기 소개를 입력해주세요"
+            )}
+          </FormControl>
+          <FormControl
+            sx={{
+              span: {
+                fontSize: "0.9rem",
+              },
+            }}
+            isInvalid={!!errors.style}
+          >
+            {currTab === "길드" ? (
+              <>
+                <FormLabel mt="8" fontWeight="bold" color="#555">
+                  길드 스타일
+                </FormLabel>
+                <CheckboxGroup>
+                  <HStack spacing="24px">
+                    <Checkbox value="friend" {...register("style")}>
+                      <Text>친목</Text>
+                    </Checkbox>
+                    <Checkbox value="solo" {...register("style")}>
+                      <Text>솔플</Text>
+                    </Checkbox>
+                    <Checkbox value="voice" {...register("style")}>
+                      <Text>보이스</Text>
+                    </Checkbox>
+                    <Checkbox value="chat" {...register("style")}>
+                      <Text>채팅만</Text>
+                    </Checkbox>
+                  </HStack>
+                </CheckboxGroup>
+                {errors?.style ? (
+                  <FormErrorMessage>{errors.style.message}</FormErrorMessage>
+                ) : (
+                  <FormHelperText>
+                    우리 길드의 스타일을 선택해주세요
+                  </FormHelperText>
+                )}
+              </>
+            ) : (
+              <>
+                <FormLabel mt="8" fontWeight="bold" color="#555">
+                  플레이 스타일
+                </FormLabel>
+                <CheckboxGroup>
+                  <HStack spacing="24px">
+                    <Checkbox value="attacker" {...register("style")}>
+                      <Text>돌격형</Text>
+                    </Checkbox>
+                    <Checkbox value="defender" {...register("style")}>
+                      <Text>방어형</Text>
+                    </Checkbox>
+                    <Checkbox value="serious" {...register("style")}>
+                      <Text>빡겜</Text>
+                    </Checkbox>
+                    <Checkbox value="casual" {...register("style")}>
+                      <Text>즐겜</Text>
+                    </Checkbox>
+                  </HStack>
+                  <HStack spacing="24px" mt="2">
+                    <Checkbox value="voice" {...register("style")}>
+                      <Text>보이스</Text>
+                    </Checkbox>
+                    <Checkbox value="chat" {...register("style")}>
+                      <Text>채팅만</Text>
+                    </Checkbox>
+                    <Checkbox value="interact" {...register("style")}>
+                      <Text>소통</Text>
+                    </Checkbox>
+                    <Checkbox value="solo" {...register("style")}>
+                      <Text>솔플</Text>
+                    </Checkbox>
+                  </HStack>
+                </CheckboxGroup>
+                {errors?.style ? (
+                  <FormErrorMessage>{errors.style.message}</FormErrorMessage>
+                ) : (
+                  <FormHelperText>
+                    {currTab === "친구" ? "나" : "우리 파티"}의 플레이 스타일을
+                    선택해주세요
+                  </FormHelperText>
+                )}
+              </>
+            )}
+          </FormControl>
+          <FormControl
+            sx={{
+              textarea: {
+                fontSize: "0.9rem",
+              },
+            }}
+            isInvalid={!!errors?.intro}
+          >
+            <FormLabel mt="8" fontWeight="bold" color="#555">
+              {currTab === "친구"
+                ? "자기"
                 : currTab === "파티"
-                ? "파티 소개를 입력해주세요"
-                : "길드 소개를 입력해주세요"
-            }
-          />
-          <FormHelperText>
-            {currTab === "친구"
-              ? "나"
-              : currTab === "파티"
-              ? "우리 파티"
-              : "우리 길드"}
-            를 예비{" "}
-            {currTab === "친구"
-              ? "친구"
-              : currTab === "파티"
-              ? "파티원"
-              : "길드원"}
-            들에게 소개해보세요
-          </FormHelperText>
-        </FormControl>
-        <Flex justify="end" mt="4">
-          <Button size="md">만들기</Button>
-        </Flex>
+                ? "파티"
+                : "길드"}{" "}
+              소개
+            </FormLabel>
+            <Textarea
+              {...register("intro")}
+              placeholder={
+                currTab === "친구"
+                  ? "자기 소개를 입력해주세요"
+                  : currTab === "파티"
+                  ? "파티 소개를 입력해주세요"
+                  : "길드 소개를 입력해주세요"
+              }
+              onKeyDown={onTextareaKeyDown}
+            />
+            {errors?.intro ? (
+              <FormErrorMessage>{errors.intro.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText>
+                {currTab === "친구"
+                  ? "나"
+                  : currTab === "파티"
+                  ? "우리 파티"
+                  : "우리 길드"}
+                를 예비{" "}
+                {currTab === "친구"
+                  ? "친구"
+                  : currTab === "파티"
+                  ? "파티원"
+                  : "길드원"}
+                들에게 소개해보세요
+              </FormHelperText>
+            )}
+          </FormControl>
+          <Flex justify="end" mt="4">
+            <Button size="md" type="submit" isLoading={isSubmitting}>
+              만들기
+            </Button>
+          </Flex>
+        </form>
       </Box>
     </Flex>
   );

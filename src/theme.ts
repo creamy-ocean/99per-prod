@@ -42,6 +42,9 @@ const theme = extendTheme({
           fontFamily: "Roboto",
           fontSize: "0.9rem",
         },
+        "select-box": {
+          fontSize: "0.9rem",
+        },
       },
     },
     Button: {
@@ -50,8 +53,8 @@ const theme = extendTheme({
           padding: "1rem",
         },
         md: {
-          padding: "1.5rem",
-          borderRadius: "2rem",
+          padding: "1rem",
+          borderRadius: "lg",
         },
       },
       variants: {

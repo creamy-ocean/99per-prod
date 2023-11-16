@@ -10,6 +10,7 @@ import {
   FormLabel,
   HStack,
   Heading,
+  Input,
   Select,
   Tab,
   TabList,
@@ -22,7 +23,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { array, object, string } from "yup";
 
-const INTRO_REG_EXP = /^((?![%=*><]).)*$/g;
+const REG_EXP = /^((?![%=*><]).)*$/g;
 
 const formSchema = object({
   game: string().required(),
@@ -40,8 +41,13 @@ const formSchema = object({
     .required(),
   intro: string()
     .min(1, "최소 한 글자 이상 입력해주세요")
-    .matches(INTRO_REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
+    .matches(REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
     .max(256, "최대 256자까지 입력 가능합니다")
+    .required(),
+  contact: string()
+    .min(1, "최소 한 글자 이상 입력해주세요")
+    .matches(REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
+    .max(64, "최대 64자까지 입력 가능합니다")
     .required(),
 }).required();
 
@@ -77,6 +83,7 @@ const NewProfile = () => {
       direction="column"
       px="20"
       pt="4"
+      pb="8"
       my="8"
       backgroundColor="white"
       borderRadius="xl"
@@ -289,7 +296,30 @@ const NewProfile = () => {
               </FormHelperText>
             )}
           </FormControl>
-          <Flex justify="end" mt="4">
+          <FormControl
+            sx={{
+              input: {
+                fontSize: "0.9rem",
+              },
+            }}
+            isInvalid={!!errors?.contact}
+          >
+            <FormLabel mt="8" fontWeight="bold" color="#555">
+              연락처
+            </FormLabel>
+            <Input
+              {...register("contact")}
+              placeholder="채팅방 링크 또는 닉네임을 입력해주세요"
+            />
+            {errors?.contact ? (
+              <FormErrorMessage>{errors.contact.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText>
+                {currTab} 신청을 수락하기 전까지 노출되지 않습니다
+              </FormHelperText>
+            )}
+          </FormControl>
+          <Flex justify="end" mt="6">
             <Button size="md" type="submit" isLoading={isSubmitting}>
               만들기
             </Button>

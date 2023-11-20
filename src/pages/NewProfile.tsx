@@ -69,9 +69,6 @@ const NewProfile = () => {
     reset,
   } = useForm({
     resolver: yupResolver(formSchema),
-    defaultValues: {
-      game: "리그 오브 레전드",
-    },
   });
 
   const changeTab = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -127,7 +124,7 @@ const NewProfile = () => {
             <FormLabel fontWeight="bold" color="#555">
               게임
             </FormLabel>
-            <Select>
+            <Select {...register("game")}>
               <option>리그 오브 레전드</option>
               <option>메이플스토리</option>
               <option>배틀그라운드</option>

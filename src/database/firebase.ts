@@ -1,3 +1,4 @@
+import { FormValues } from "@/types/types";
 import { config } from "@/utils/config";
 import { initializeApp } from "firebase/app";
 import {
@@ -69,4 +70,47 @@ export const getUserState = async (userId: string) => {
       }
     })
     .catch(console.error);
+};
+
+export const addProfile = async (
+  tab: string,
+  userId: string | undefined,
+  values: FormValues
+) => {
+  const tabName = changeTabName(tab);
+  const { game, ...restValues } = values;
+  const profileExists = await getProfile(tabName, game, userId);
+  if (profileExists) throw new Error("해당 게임의 프로필이 이미 존재합니다");
+  set(ref(database, `profiles/${tabName}/${game}/${userId}`), {
+    ...restValues,
+  });
+};
+
+const getProfile = async (
+  tab: string,
+  game: string,
+  userId: string | undefined
+) => {
+  return get(ref(database, `profiles/${tab}/${game}/${userId}`)).then(
+    (snapshot) => {
+      if (snapshot.exists()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  );
+};
+
+const changeTabName = (tab: string) => {
+  switch (tab) {
+    case "친구":
+      return "friends";
+    case "파티":
+      return "parties";
+    case "길드":
+      return "guilds";
+    default:
+      return "";
+  }
 };

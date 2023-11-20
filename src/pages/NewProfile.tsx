@@ -1,4 +1,9 @@
+import { useAuthContext } from "@/context/AuthContext";
+import { addProfile } from "@/database/firebase";
+import { FormValues } from "@/types/types";
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   Checkbox,
@@ -20,7 +25,7 @@ import {
 } from "@chakra-ui/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { array, object, string } from "yup";
 
 const REG_EXP = /^((?![%=*><]).)*$/g;
@@ -42,7 +47,7 @@ const formSchema = object({
   intro: string()
     .min(1, "최소 한 글자 이상 입력해주세요")
     .matches(REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
-    .max(256, "최대 256자까지 입력 가능합니다")
+    .max(128, "최대 128자까지 입력 가능합니다")
     .required(),
   contact: string()
     .min(1, "최소 한 글자 이상 입력해주세요")
@@ -53,6 +58,9 @@ const formSchema = object({
 
 const NewProfile = () => {
   const [currTab, setCurrTab] = useState<string>("친구");
+  const [error, setError] = useState();
+  const user = useAuthContext();
+
   const {
     handleSubmit,
     register,
@@ -61,6 +69,9 @@ const NewProfile = () => {
     reset,
   } = useForm({
     resolver: yupResolver(formSchema),
+    defaultValues: {
+      game: "리그 오브 레전드",
+    },
   });
 
   const changeTab = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -70,8 +81,12 @@ const NewProfile = () => {
     reset();
   };
 
-  const onSubmit = () => {
-    // Todo
+  const onSubmit: SubmitHandler<FormValues> = async (formValues) => {
+    try {
+      await addProfile(currTab, user?.uid, formValues);
+    } catch (e: any) {
+      setError(e.message);
+    }
   };
 
   const onTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -132,24 +147,24 @@ const NewProfile = () => {
             </FormLabel>
             <CheckboxGroup>
               <HStack spacing="24px">
-                <Checkbox value="rank" {...register("interest")}>
+                <Checkbox value="랭크/티어" {...register("interest")}>
                   <Text>랭크/티어</Text>
                 </Checkbox>
-                <Checkbox value="level" {...register("interest")}>
+                <Checkbox value="레벨/스펙" {...register("interest")}>
                   <Text>레벨/스펙</Text>
                 </Checkbox>
-                <Checkbox value="deco" {...register("interest")}>
+                <Checkbox value="코디/꾸미기" {...register("interest")}>
                   <Text>코디/꾸미기</Text>
                 </Checkbox>
               </HStack>
               <HStack spacing="11px" mt="2">
-                <Checkbox value="boss" {...register("interest")}>
+                <Checkbox value="보스/레이드" {...register("interest")}>
                   <Text>보스/레이드</Text>
                 </Checkbox>
-                <Checkbox value="collect" {...register("interest")}>
+                <Checkbox value="수집/컬렉션" {...register("interest")}>
                   <Text>수집/컬렉션</Text>
                 </Checkbox>
-                <Checkbox value="hunt" {...register("interest")}>
+                <Checkbox value="사냥/채집" {...register("interest")}>
                   <Text>사냥/채집</Text>
                 </Checkbox>
               </HStack>
@@ -182,16 +197,16 @@ const NewProfile = () => {
                 </FormLabel>
                 <CheckboxGroup>
                   <HStack spacing="24px">
-                    <Checkbox value="friend" {...register("style")}>
+                    <Checkbox value="친목" {...register("style")}>
                       <Text>친목</Text>
                     </Checkbox>
-                    <Checkbox value="solo" {...register("style")}>
+                    <Checkbox value="솔플" {...register("style")}>
                       <Text>솔플</Text>
                     </Checkbox>
-                    <Checkbox value="voice" {...register("style")}>
+                    <Checkbox value="보이스" {...register("style")}>
                       <Text>보이스</Text>
                     </Checkbox>
-                    <Checkbox value="chat" {...register("style")}>
+                    <Checkbox value="채팅만" {...register("style")}>
                       <Text>채팅만</Text>
                     </Checkbox>
                   </HStack>
@@ -211,30 +226,30 @@ const NewProfile = () => {
                 </FormLabel>
                 <CheckboxGroup>
                   <HStack spacing="24px">
-                    <Checkbox value="attacker" {...register("style")}>
+                    <Checkbox value="돌격형" {...register("style")}>
                       <Text>돌격형</Text>
                     </Checkbox>
-                    <Checkbox value="defender" {...register("style")}>
+                    <Checkbox value="방어형" {...register("style")}>
                       <Text>방어형</Text>
                     </Checkbox>
-                    <Checkbox value="serious" {...register("style")}>
+                    <Checkbox value="빡겜" {...register("style")}>
                       <Text>빡겜</Text>
                     </Checkbox>
-                    <Checkbox value="casual" {...register("style")}>
+                    <Checkbox value="즐겜" {...register("style")}>
                       <Text>즐겜</Text>
                     </Checkbox>
                   </HStack>
                   <HStack spacing="24px" mt="2">
-                    <Checkbox value="voice" {...register("style")}>
+                    <Checkbox value="보이스" {...register("style")}>
                       <Text>보이스</Text>
                     </Checkbox>
-                    <Checkbox value="chat" {...register("style")}>
+                    <Checkbox value="채팅만" {...register("style")}>
                       <Text>채팅만</Text>
                     </Checkbox>
-                    <Checkbox value="interact" {...register("style")}>
+                    <Checkbox value="소통" {...register("style")}>
                       <Text>소통</Text>
                     </Checkbox>
-                    <Checkbox value="solo" {...register("style")}>
+                    <Checkbox value="솔플" {...register("style")}>
                       <Text>솔플</Text>
                     </Checkbox>
                   </HStack>
@@ -319,6 +334,18 @@ const NewProfile = () => {
               </FormHelperText>
             )}
           </FormControl>
+          {error && (
+            <Alert
+              status="info"
+              mt="6"
+              borderRadius="lg"
+              color="brand.500"
+              fontWeight="bold"
+            >
+              <AlertIcon />
+              {error}
+            </Alert>
+          )}
           <Flex justify="end" mt="6">
             <Button size="md" type="submit" isLoading={isSubmitting}>
               만들기

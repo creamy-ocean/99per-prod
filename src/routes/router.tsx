@@ -4,6 +4,7 @@ import Friends from "@/pages/Friends";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Root from "@/pages/Root";
+import NewProfile from "@/pages/newProfile";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
       },
       { path: "/certify", element: <Certify /> },
       { path: "/friends", element: <Friends /> },
+      { path: "/newProfile", element: <NewProfile /> },
     ],
   },
 ]);

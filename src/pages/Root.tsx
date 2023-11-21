@@ -8,10 +8,12 @@ const Root = () => {
   return (
     <>
       {user?.userState === "certified" ? (
-        <>
+        <Flex direction="column" h="100vh">
           <Header />
-          <Outlet />
-        </>
+          <Flex flex="1" backgroundColor="#E6F2FD" justify="center">
+            <Outlet />
+          </Flex>
+        </Flex>
       ) : (
         <>
           <Flex

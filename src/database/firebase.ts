@@ -1,3 +1,4 @@
+import { FormValues } from "@/types/types";
 import { config } from "@/utils/config";
 import { initializeApp } from "firebase/app";
 import {
@@ -9,7 +10,14 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { get, getDatabase, ref, set } from "firebase/database";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: config.firebase.apiKey,
@@ -26,7 +34,7 @@ const app = initializeApp(firebaseConfig);
 const googleProvider = new GoogleAuthProvider();
 const twitterProvider = new TwitterAuthProvider();
 const auth = getAuth();
-const database = getDatabase(app);
+const db = getFirestore(app);
 
 const providers: Providers = {
   google: googleProvider,
@@ -52,21 +60,44 @@ export const onUserStateChanged = (callback: any) => {
   });
 };
 
-const addUserState = (userId: string, userState: string) => {
-  set(ref(database, "users/" + userId), {
+const addUserState = async (userId: string, userState: string) => {
+  await setDoc(doc(db, "users", userId), {
     state: userState,
   });
 };
 
 export const getUserState = async (userId: string) => {
-  return get(ref(database, `users/${userId}`))
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        const userState = snapshot.val().state;
-        return userState;
-      } else {
-        return null;
-      }
-    })
-    .catch(console.error);
+  const docSnap = await getDoc(doc(db, "users", userId));
+  if (docSnap.exists()) {
+    const userState = docSnap.data().state;
+    return userState;
+  } else {
+    return null;
+  }
+};
+
+export const addProfile = async (
+  tab: string,
+  userId: string | undefined,
+  values: FormValues
+) => {
+  const changedTabName = changeTabName(tab);
+  const { game, ...restValues } = values;
+  await addDoc(collection(db, `profiles/${changedTabName}/${game}`), {
+    userId,
+    ...restValues,
+  });
+};
+
+const changeTabName = (tab: string) => {
+  switch (tab) {
+    case "친구":
+      return "friends";
+    case "파티":
+      return "parties";
+    case "길드":
+      return "guilds";
+    default:
+      return "";
+  }
 };

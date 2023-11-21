@@ -10,7 +10,14 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { get, getDatabase, ref, set } from "firebase/database";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: config.firebase.apiKey,
@@ -27,7 +34,7 @@ const app = initializeApp(firebaseConfig);
 const googleProvider = new GoogleAuthProvider();
 const twitterProvider = new TwitterAuthProvider();
 const auth = getAuth();
-const database = getDatabase(app);
+const db = getFirestore(app);
 
 const providers: Providers = {
   google: googleProvider,
@@ -53,23 +60,20 @@ export const onUserStateChanged = (callback: any) => {
   });
 };
 
-const addUserState = (userId: string, userState: string) => {
-  set(ref(database, "users/" + userId), {
+const addUserState = async (userId: string, userState: string) => {
+  await setDoc(doc(db, "users", userId), {
     state: userState,
   });
 };
 
 export const getUserState = async (userId: string) => {
-  return get(ref(database, `users/${userId}`))
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        const userState = snapshot.val().state;
-        return userState;
-      } else {
-        return null;
-      }
-    })
-    .catch(console.error);
+  const docSnap = await getDoc(doc(db, "users", userId));
+  if (docSnap.exists()) {
+    const userState = docSnap.data().state;
+    return userState;
+  } else {
+    return null;
+  }
 };
 
 export const addProfile = async (
@@ -77,29 +81,12 @@ export const addProfile = async (
   userId: string | undefined,
   values: FormValues
 ) => {
-  const tabName = changeTabName(tab);
+  const changedTabName = changeTabName(tab);
   const { game, ...restValues } = values;
-  const profileExists = await getProfile(tabName, game, userId);
-  if (profileExists) throw new Error("해당 게임의 프로필이 이미 존재합니다");
-  set(ref(database, `profiles/${tabName}/${game}/${userId}`), {
+  await addDoc(collection(db, `profiles/${changedTabName}/${game}`), {
+    userId,
     ...restValues,
   });
-};
-
-const getProfile = async (
-  tab: string,
-  game: string,
-  userId: string | undefined
-) => {
-  return get(ref(database, `profiles/${tab}/${game}/${userId}`)).then(
-    (snapshot) => {
-      if (snapshot.exists()) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  );
 };
 
 const changeTabName = (tab: string) => {

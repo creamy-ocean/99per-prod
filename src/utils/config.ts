@@ -12,5 +12,6 @@ export const config = {
     authDomain: required("VITE_APP_FIREBASE_AUTH_DOMAIN"),
     databaseURL: required("VITE_APP_FIREBASE_DATABASE_URL"),
     projectId: required("VITE_APP_FIREBASE_PROJECT_ID"),
+    storageBucket: required("VITE_APP_FIREBASE_STORAGE_BUCKET"),
   },
 };

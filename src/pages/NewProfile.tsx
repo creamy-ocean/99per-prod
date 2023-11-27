@@ -15,6 +15,7 @@ import {
   FormLabel,
   HStack,
   Heading,
+  Img,
   Input,
   Select,
   Tab,
@@ -22,43 +23,64 @@ import {
   Tabs,
   Text,
   Textarea,
+  VisuallyHiddenInput,
 } from "@chakra-ui/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { array, object, string } from "yup";
+import { useEffect, useState } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { array, mixed, object, string } from "yup";
 
 const REG_EXP = /^((?![%=*><]).)*$/g;
 
-const formSchema = object({
-  game: string().required(),
-  interest: array()
-    .of(string())
-    .ensure()
-    .compact()
-    .min(1, "하나 이상의 관심사를 선택해주세요")
-    .required(),
-  style: array()
-    .of(string())
-    .ensure()
-    .compact()
-    .min(1, "하나 이상의 스타일을 선택해주세요")
-    .required(),
-  intro: string()
-    .min(1, "최소 한 글자 이상 입력해주세요")
-    .matches(REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
-    .max(128, "최대 128자까지 입력 가능합니다")
-    .required(),
-  contact: string()
-    .min(1, "최소 한 글자 이상 입력해주세요")
-    .matches(REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
-    .max(64, "최대 64자까지 입력 가능합니다")
-    .required(),
-}).required();
+const formSchema = object()
+  .shape({
+    game: string().required(),
+    interest: array()
+      .of(string())
+      .ensure()
+      .compact()
+      .min(1, "하나 이상의 관심사를 선택해주세요")
+      .required(),
+    style: array()
+      .of(string())
+      .ensure()
+      .compact()
+      .min(1, "하나 이상의 스타일을 선택해주세요")
+      .required(),
+    image: mixed<FileList>().test(
+      "fileSize",
+      "최대 1MB까지 업로드 가능",
+      (files, context) => {
+        if (files && files.length > 0) {
+          if (files[0].size > 1000000) {
+            return context.createError({
+              message: "최대 1MB까지 업로드 가능합니다",
+            });
+          } else {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      }
+    ),
+    intro: string()
+      .min(1, "최소 한 글자 이상 입력해주세요")
+      .matches(REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
+      .max(128, "최대 128자까지 입력 가능합니다")
+      .required(),
+    contact: string()
+      .min(1, "최소 한 글자 이상 입력해주세요")
+      .matches(REG_EXP, "특수문자 %, =, *, >, <는 입력할 수 없습니다")
+      .max(64, "최대 64자까지 입력 가능합니다")
+      .required(),
+  })
+  .required();
 
 const NewProfile = () => {
   const [currTab, setCurrTab] = useState<string>("친구");
   const [error, setError] = useState();
+  const [imgPreview, setImgPreview] = useState<string>();
   const user = useAuthContext();
 
   const {
@@ -67,9 +89,20 @@ const NewProfile = () => {
     formState: { errors, isSubmitting },
     clearErrors,
     reset,
+    watch,
+    control,
   } = useForm({
     resolver: yupResolver(formSchema),
   });
+
+  const profileImg = watch("image");
+
+  useEffect(() => {
+    if (profileImg && profileImg.length > 0) {
+      const file = profileImg[0];
+      setImgPreview(URL.createObjectURL(file));
+    }
+  }, [profileImg]);
 
   const changeTab = (e: React.MouseEvent<HTMLButtonElement>) => {
     const eventTarget = e.target as HTMLButtonElement;
@@ -80,6 +113,7 @@ const NewProfile = () => {
 
   const onSubmit: SubmitHandler<FormValues> = async (formValues) => {
     try {
+      console.log(formValues);
       await addProfile(currTab, user?.uid, formValues);
     } catch (e: any) {
       setError(e.message);
@@ -260,6 +294,87 @@ const NewProfile = () => {
                   </FormHelperText>
                 )}
               </>
+            )}
+          </FormControl>
+          <FormControl isInvalid={!!errors.image}>
+            <FormLabel mt="8" fontWeight="bold" color="#555">
+              프로필 사진
+            </FormLabel>
+            <Flex
+              align="center"
+              direction="column"
+              border="1px solid #E2E8F0"
+              borderRadius="base"
+              p="1rem"
+            >
+              {imgPreview ? (
+                <>
+                  <Img src={imgPreview} w="8rem" h="8rem" borderRadius="full" />
+                </>
+              ) : (
+                <>
+                  <Box>
+                    <i
+                      className="fa-regular fa-image"
+                      style={{ fontSize: "2rem", color: "#718096" }}
+                    ></i>
+                  </Box>
+                </>
+              )}
+              <label
+                htmlFor="image-input"
+                style={{
+                  width: "100%",
+                  marginTop: "14px",
+                  padding: "6px 0px",
+                  backgroundColor: "#E2E8F0",
+                  fontSize: "0.9rem",
+                  textAlign: "center",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                파일 선택
+              </label>
+              <Controller
+                control={control}
+                name={"image"}
+                render={({ field: { onChange } }) => (
+                  <VisuallyHiddenInput
+                    color="#718096"
+                    border="none"
+                    borderRadius="base"
+                    cursor="pointer"
+                    type="file"
+                    accept="image/*"
+                    id="image-input"
+                    onChange={(e) => {
+                      if (
+                        e.target.files === null ||
+                        e.target.files.length === 0
+                      )
+                        return;
+                      onChange(e.target.files);
+                    }}
+                  />
+                )}
+              />
+              {/* <VisuallyHiddenInput
+                color="#718096"
+                border="none"
+                borderRadius="base"
+                cursor="pointer"
+                type="file"
+                accept="image/*"
+                id="image-input"
+                {...register("image")}
+              /> */}
+            </Flex>
+            {errors?.image ? (
+              <FormErrorMessage>{errors.image.message}</FormErrorMessage>
+            ) : (
+              <FormHelperText>프로필 사진을 업로드 해주세요</FormHelperText>
             )}
           </FormControl>
           <FormControl

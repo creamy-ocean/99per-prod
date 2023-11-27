@@ -16,14 +16,18 @@ import {
   doc,
   getDoc,
   getFirestore,
+  serverTimestamp,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: config.firebase.apiKey,
   authDomain: config.firebase.authDomain,
   databaseURL: config.firebase.databaseURL,
   projectId: config.firebase.projectId,
+  storageBucket: config.firebase.storageBucket,
 };
 
 interface Providers {
@@ -35,6 +39,7 @@ const googleProvider = new GoogleAuthProvider();
 const twitterProvider = new TwitterAuthProvider();
 const auth = getAuth();
 const db = getFirestore(app);
+const storage = getStorage();
 
 const providers: Providers = {
   google: googleProvider,
@@ -82,11 +87,28 @@ export const addProfile = async (
   values: FormValues
 ) => {
   const changedTabName = changeTabName(tab);
-  const { game, ...restValues } = values;
-  await addDoc(collection(db, `profiles/${changedTabName}/${game}`), {
-    userId,
-    ...restValues,
-  });
+  const { game, image, ...restValues } = values;
+  const doc = await addDoc(
+    collection(db, `profiles/${changedTabName}/${game}`),
+    {
+      userId,
+      ...restValues,
+      createdAt: serverTimestamp(),
+    }
+  );
+  if (image) {
+    const result = await uploadProfileImage(
+      changedTabName,
+      game,
+      image[0],
+      userId,
+      doc.id
+    );
+    const url = await getDownloadURL(result.ref);
+    await updateDoc(doc, {
+      image: url,
+    });
+  }
 };
 
 const changeTabName = (tab: string) => {
@@ -100,4 +122,15 @@ const changeTabName = (tab: string) => {
     default:
       return "";
   }
+};
+
+const uploadProfileImage = async (
+  tab: string,
+  game: string,
+  image: File,
+  userId: string | undefined,
+  docId: string
+) => {
+  const storageRef = ref(storage, `profiles/${tab}/${game}/${userId}/${docId}`);
+  return await uploadBytes(storageRef, image);
 };

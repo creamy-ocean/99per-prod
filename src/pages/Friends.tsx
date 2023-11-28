@@ -40,11 +40,11 @@ const Friends = () => {
         나와 잘 맞는 친구를 찾아보세요
       </Heading>
       <Divider w="80%" mt="4" mb="8" />
-      <Grid gap="2" w="70%">
-        {profiles.map(({ style, interest, image, intro, contact }, idx) => {
+      <Grid gap="2" w="80%">
+        {profiles.map(({ style, interest, image, intro }, idx) => {
           return (
             <Grid
-              templateColumns="1fr 4fr"
+              templateColumns="1fr 5fr 0.5fr"
               border="1px solid #fff"
               borderRadius="base"
               p="2"
@@ -73,16 +73,29 @@ const Friends = () => {
                   <Box>'_'</Box>
                 )}
               </Flex>
-              <Box fontSize="0.9rem">
-                <Tag colorScheme="blue">{style}</Tag>
-                <Tag colorScheme="blue" ml="1">
-                  {interest}
-                </Tag>
-                <Text>{intro}</Text>
-                <Text textAlign="right" fontWeight="bold">
-                  {contact}
-                </Text>
+              <Box fontSize="0.9rem" ml="2">
+                {style.map((s) => {
+                  return (
+                    <Tag colorScheme="blue" mr="1" mt="0.5">
+                      {s}
+                    </Tag>
+                  );
+                })}
+                {interest.map((i) => {
+                  return (
+                    <Tag colorScheme="blue" mr="1" mt="0.5">
+                      {i}
+                    </Tag>
+                  );
+                })}
+                <Text mt="0.5">{intro}</Text>
               </Box>
+              <Flex justify="center" align="center" color="grey">
+                <i
+                  className="fa-solid fa-plus"
+                  style={{ cursor: "pointer" }}
+                ></i>
+              </Flex>
             </Grid>
           );
         })}

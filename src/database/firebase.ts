@@ -63,7 +63,11 @@ export const logout = () => {
 
 export const onUserStateChanged = (callback: any) => {
   onAuthStateChanged(auth, async (user) => {
-    const userState = user ? await getUserState(user.uid) : null;
+    if (!user) {
+      callback(null);
+      return;
+    }
+    const userState = await getUserState(user.uid);
     callback({ ...user, userState });
   });
 };

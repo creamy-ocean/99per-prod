@@ -1,4 +1,3 @@
-import Certify from "@/pages/Certify";
 import ErrorPage from "@/pages/ErrorPage";
 import Friends from "@/pages/Friends";
 import Home from "@/pages/Home";
@@ -25,11 +24,38 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { path: "/certify", element: <Certify /> },
-      { path: "/friends", element: <Friends /> },
-      { path: "/guilds", element: <Guilds /> },
-      { path: "/parties", element: <Parties /> },
-      { path: "/newProfile", element: <NewProfile /> },
+      {
+        path: "/friends",
+        element: (
+          <ProtectedRoute>
+            <Friends />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/guilds",
+        element: (
+          <ProtectedRoute>
+            <Guilds />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/parties",
+        element: (
+          <ProtectedRoute>
+            <Parties />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/newProfile",
+        element: (
+          <ProtectedRoute>
+            <NewProfile />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);

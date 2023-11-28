@@ -7,7 +7,7 @@ const Root = () => {
   const user = useAuthContext();
   return (
     <>
-      {user?.userState === "certified" ? (
+      {user ? (
         <Flex direction="column" h="100vh">
           <Header />
           <Flex flex="1" backgroundColor="#E6F2FD" justify="center">

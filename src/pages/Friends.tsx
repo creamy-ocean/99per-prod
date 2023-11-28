@@ -74,16 +74,16 @@ const Friends = () => {
                 )}
               </Flex>
               <Box fontSize="0.9rem" ml="2">
-                {style.map((s) => {
+                {style.map((s, idx) => {
                   return (
-                    <Tag colorScheme="blue" mr="1" mt="0.5">
+                    <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
                       {s}
                     </Tag>
                   );
                 })}
-                {interest.map((i) => {
+                {interest.map((i, idx) => {
                   return (
-                    <Tag colorScheme="blue" mr="1" mt="0.5">
+                    <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
                       {i}
                     </Tag>
                   );

@@ -15,7 +15,10 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   getFirestore,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -133,4 +136,24 @@ const uploadProfileImage = async (
 ) => {
   const storageRef = ref(storage, `profiles/${tab}/${game}/${userId}/${docId}`);
   return await uploadBytes(storageRef, image);
+};
+
+export const getProfiles = async (tab: string) => {
+  const profilesQuery = query(
+    collection(db, `${tab}`),
+    orderBy("createdAt", "desc")
+  );
+  const snapshot = await getDocs(profilesQuery);
+  const profiles = snapshot.docs.map((doc) => {
+    const { style, interest, image, intro, contact } = doc.data();
+    return {
+      userId: doc.id,
+      style,
+      interest,
+      image,
+      intro,
+      contact,
+    };
+  });
+  return profiles;
 };

@@ -3,8 +3,8 @@ import ErrorPage from "@/pages/ErrorPage";
 import Friends from "@/pages/Friends";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
+import NewProfile from "@/pages/NewProfile";
 import Root from "@/pages/Root";
-import NewProfile from "@/pages/newProfile";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 

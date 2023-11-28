@@ -4,6 +4,7 @@ import Friends from "@/pages/Friends";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import NewProfile from "@/pages/NewProfile";
+import Parties from "@/pages/Parties";
 import Root from "@/pages/Root";
 import Guilds from "@/pages/guilds";
 import { createBrowserRouter } from "react-router-dom";
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
       { path: "/certify", element: <Certify /> },
       { path: "/friends", element: <Friends /> },
       { path: "/guilds", element: <Guilds /> },
+      { path: "/parties", element: <Parties /> },
       { path: "/newProfile", element: <NewProfile /> },
     ],
   },

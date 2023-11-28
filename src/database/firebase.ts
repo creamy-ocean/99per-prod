@@ -90,19 +90,15 @@ export const addProfile = async (
   values: FormValues
 ) => {
   const changedTabName = changeTabName(tab);
-  const { game, image, ...restValues } = values;
-  const doc = await addDoc(
-    collection(db, `profiles/${changedTabName}/${game}`),
-    {
-      userId,
-      ...restValues,
-      createdAt: serverTimestamp(),
-    }
-  );
+  const { image, ...restValues } = values;
+  const doc = await addDoc(collection(db, `${changedTabName}`), {
+    userId,
+    ...restValues,
+    createdAt: serverTimestamp(),
+  });
   if (image) {
     const result = await uploadProfileImage(
       changedTabName,
-      game,
       image[0],
       userId,
       doc.id
@@ -129,12 +125,11 @@ const changeTabName = (tab: string) => {
 
 const uploadProfileImage = async (
   tab: string,
-  game: string,
   image: File,
   userId: string | undefined,
   docId: string
 ) => {
-  const storageRef = ref(storage, `profiles/${tab}/${game}/${userId}/${docId}`);
+  const storageRef = ref(storage, `${tab}/${userId}/${docId}`);
   return await uploadBytes(storageRef, image);
 };
 

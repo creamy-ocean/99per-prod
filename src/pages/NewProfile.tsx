@@ -160,8 +160,8 @@ const NewProfile = () => {
             </FormLabel>
             <Select {...register("game")}>
               <option>리그 오브 레전드</option>
-              <option>메이플스토리</option>
               <option>배틀그라운드</option>
+              <option>스팀 게임</option>
             </Select>
             <FormHelperText>프로필을 등록할 게임을 선택해주세요</FormHelperText>
           </FormControl>

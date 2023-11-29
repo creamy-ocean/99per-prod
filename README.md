@@ -12,7 +12,7 @@
 
 ## 실행 화면
 
-![캡처2](https://github.com/creamy-ocean/99per-prod/assets/93719660/3d51aa1b-ea89-4251-ac2e-b5dd4c0d1224)
+![Honeycam 2023-11-29 14-15-38](https://github.com/creamy-ocean/99per-ver.2/assets/93719660/211abfe1-28c9-4c33-a889-85dcd74099f1)
 <br/>
 <br/>
 

@@ -1,5 +1,6 @@
 import { FormValues } from "@/types/types";
 import { config } from "@/utils/config";
+import { changeTabName } from "@/utils/utilFunctions";
 import { initializeApp } from "firebase/app";
 import {
   AuthProvider,
@@ -111,19 +112,6 @@ export const addProfile = async (
     await updateDoc(doc, {
       image: url,
     });
-  }
-};
-
-const changeTabName = (tab: string) => {
-  switch (tab) {
-    case "친구":
-      return "friends";
-    case "파티":
-      return "parties";
-    case "길드":
-      return "guilds";
-    default:
-      return "";
   }
 };
 

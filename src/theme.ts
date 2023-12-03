@@ -9,7 +9,7 @@ const theme = extendTheme({
     brand: {
       50: "#5096F2",
       100: "#7EB0F2",
-      500: "#008BE8",
+      500: "#0175DE",
     },
   },
   components: {

@@ -2,12 +2,12 @@ import { useAuthContext } from "@/context/AuthContext";
 import { logout } from "@/database/firebase";
 import { AddIcon, CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import {
-  Avatar,
   Box,
   Button,
   Flex,
   HStack,
   IconButton,
+  Img,
   Menu,
   MenuButton,
   MenuDivider,
@@ -58,7 +58,7 @@ const Header = () => {
 
   return (
     <>
-      <Box backgroundColor="brand.100" px={4}>
+      <Box backgroundColor="brand.500" px={4}>
         <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
           <IconButton
             size={"md"}
@@ -68,7 +68,9 @@ const Header = () => {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Box>로고</Box>
+            <Box color="white" fontWeight="bold">
+              로고
+            </Box>
             <HStack
               as={"nav"}
               spacing={4}
@@ -83,9 +85,9 @@ const Header = () => {
             <Link to="/newProfile">
               <Button
                 variant={"solid"}
-                backgroundColor="brand.50"
                 size={"sm"}
                 mr={4}
+                border="2px solid #5096F2"
                 leftIcon={<AddIcon />}
               >
                 프로필 생성
@@ -98,9 +100,15 @@ const Header = () => {
                 variant={"link"}
                 cursor={"pointer"}
                 minW={0}
+                aria-label="로그인한 유저의 프로필 사진 또는 닉네임"
               >
                 {user?.photoURL ? (
-                  <Avatar size={"sm"} src={user.photoURL} />
+                  <Img
+                    src={user.photoURL}
+                    w="8"
+                    borderRadius="full"
+                    alt="로그인한 유저의 프로필 사진"
+                  />
                 ) : (
                   <Box>{user?.displayName?.substring(0, 2)}</Box>
                 )}

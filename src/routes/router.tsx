@@ -1,11 +1,11 @@
 import ErrorPage from "@/pages/ErrorPage";
 import Friends from "@/pages/Friends";
-import Guilds from "@/pages/Guilds";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import NewProfile from "@/pages/NewProfile";
 import Parties from "@/pages/Parties";
 import Root from "@/pages/Root";
+import Guilds from "@/pages/guilds";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 

@@ -60,6 +60,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
                     maxW="4rem"
                     maxH="4rem"
                     borderRadius="full"
+                    alt="프로필 목록에 있는 유저의 프로필 사진"
                   />
                 ) : (
                   <Box>'_'</Box>

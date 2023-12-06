@@ -1,5 +1,6 @@
 import { getProfiles } from "@/database/firebase";
 import { Profile } from "@/types/types";
+import { changeTabName } from "@/utils/functions";
 import { Divider, Flex, Grid, Heading } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
@@ -11,19 +12,6 @@ const ProfileList = ({ tab }: { tab: string }) => {
     const changedTabName = changeTabName(tab);
     const data = await getProfiles(changedTabName);
     setProfiles(data);
-  };
-
-  const changeTabName = (tab: string) => {
-    switch (tab) {
-      case "친구":
-        return "friends";
-      case "파티":
-        return "parties";
-      case "길드":
-        return "guilds";
-      default:
-        return "";
-    }
   };
 
   useEffect(() => {

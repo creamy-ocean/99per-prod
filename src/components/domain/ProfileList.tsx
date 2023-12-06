@@ -1,3 +1,4 @@
+import { useAuthContext } from "@/context/AuthContext";
 import { getProfiles } from "@/database/firebase";
 import { Profile } from "@/types/types";
 import { changeTabName } from "@/utils/functions";
@@ -7,6 +8,7 @@ import ProfileCard from "./ProfileCard";
 
 const ProfileList = ({ tab }: { tab: string }) => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const user = useAuthContext();
 
   const fetchProfiles = async () => {
     const changedTabName = changeTabName(tab);
@@ -36,7 +38,11 @@ const ProfileList = ({ tab }: { tab: string }) => {
       <Divider w="80%" mt="4" mb="8" />
       <Grid gap="2" w="80%">
         {profiles.map((profile) => {
-          return <ProfileCard profile={profile} key={profile.userId} />;
+          if (profile.userId === user?.uid) {
+            return;
+          } else {
+            return <ProfileCard profile={profile} key={profile.userId} />;
+          }
         })}
       </Grid>
     </Flex>

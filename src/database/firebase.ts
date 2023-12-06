@@ -1,5 +1,6 @@
 import { FormValues } from "@/types/types";
 import { config } from "@/utils/config";
+import { changeTabName } from "@/utils/functions";
 import { initializeApp } from "firebase/app";
 import {
   AuthProvider,
@@ -110,19 +111,6 @@ export const addProfile = async (
   }
 };
 
-const changeTabName = (tab: string) => {
-  switch (tab) {
-    case "친구":
-      return "friends";
-    case "파티":
-      return "parties";
-    case "길드":
-      return "guilds";
-    default:
-      return "";
-  }
-};
-
 const uploadProfileImage = async (
   tab: string,
   image: File,
@@ -140,9 +128,9 @@ export const getProfiles = async (tab: string) => {
   );
   const snapshot = await getDocs(profilesQuery);
   const profiles = snapshot.docs.map((doc) => {
-    const { style, interest, image, intro, contact } = doc.data();
+    const { userId, style, interest, image, intro, contact } = doc.data();
     return {
-      userId: doc.id,
+      userId,
       style,
       interest,
       image,

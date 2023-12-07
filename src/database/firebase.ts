@@ -140,3 +140,33 @@ export const getProfiles = async (tab: string) => {
   });
   return profiles;
 };
+
+export const getGenres = async () => {
+  const genresQuery = query(collection(db, "genres"));
+  const snapshot = await getDocs(genresQuery);
+  const [genres] = Object.values(snapshot.docs[0].data());
+  return genres;
+};
+
+export const getGames = async () => {
+  const gamesQuery = query(collection(db, "games"));
+  const snapshot = await getDocs(gamesQuery);
+  const games = snapshot.docs[0].data();
+  return games;
+};
+
+export const getStyles = async (tab: string) => {
+  const changedTabName = changeTabName(tab);
+  const stylesQuery = query(collection(db, "styles"));
+  const snapshot = await getDocs(stylesQuery);
+  const styles = snapshot.docs[0].data()[changedTabName];
+  return styles;
+};
+
+export const getInterests = async (tab: string) => {
+  const changedTabName = changeTabName(tab);
+  const interestsQuery = query(collection(db, "interests"));
+  const snapshot = await getDocs(interestsQuery);
+  const interests = snapshot.docs[0].data()[changedTabName];
+  return interests;
+};

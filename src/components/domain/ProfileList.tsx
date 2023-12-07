@@ -5,6 +5,7 @@ import { changeTabName } from "@/utils/functions";
 import { Divider, Flex, Grid, Heading } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
+import ProfileFilter from "./ProfileFilter";
 
 const ProfileList = ({ tab }: { tab: string }) => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -35,6 +36,8 @@ const ProfileList = ({ tab }: { tab: string }) => {
       <Heading fontSize="3xl" color="#555" pt="6" pb="4">
         나와 잘 맞는 {tab}를 찾아보세요
       </Heading>
+      <Divider w="80%" mt="4" mb="8" />
+      <ProfileFilter tab={tab} />
       <Divider w="80%" mt="4" mb="8" />
       <Grid gap="2" w="80%">
         {profiles.map((profile) => {

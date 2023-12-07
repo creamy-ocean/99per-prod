@@ -15,3 +15,7 @@ export interface Profile {
   intro: string;
   contact: string;
 }
+
+export interface Games {
+  [key: string]: Array<string>;
+}

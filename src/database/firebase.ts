@@ -128,9 +128,10 @@ export const getProfiles = async (tab: string) => {
   );
   const snapshot = await getDocs(profilesQuery);
   const profiles = snapshot.docs.map((doc) => {
-    const { userId, style, interest, image, intro, contact } = doc.data();
+    const { userId, game, style, interest, image, intro, contact } = doc.data();
     return {
       userId,
+      game,
       style,
       interest,
       image,

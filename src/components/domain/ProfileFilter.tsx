@@ -4,18 +4,27 @@ import {
   getInterests,
   getStyles,
 } from "@/database/firebase";
-import { Games } from "@/types/types";
+import { Filters, Games } from "@/types/types";
 import { Box, Flex, Grid, Heading, Select, Tag } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-const ProfileFilter = ({ tab }: { tab: string }) => {
+const ProfileFilter = ({
+  tab,
+  filters,
+  setFilters,
+}: {
+  tab: string;
+  filters: Filters;
+  setFilters: Dispatch<SetStateAction<Filters>>;
+}) => {
   const [genres, setGenres] = useState<Array<string>>([]);
-  const [genre, setGenre] = useState<string>("AOS");
+  const [genre, setGenre] = useState<string>("all");
   const [games, setGames] = useState<Games>({});
   const [styles, setStyles] = useState<Array<string>>([]);
   const [interests, setInterests] = useState<Array<string>>([]);
 
-  const gameList = games[genre];
+  const gameList =
+    genre === "all" ? ["게임 장르를 선택해주세요"] : games[genre];
 
   const getFilters = async () => {
     const genres = await getGenres();
@@ -32,9 +41,46 @@ const ProfileFilter = ({ tab }: { tab: string }) => {
     getFilters();
   }, []);
 
-  const onGenreChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onGenreSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
     setGenre(value);
+    if (value === "all") {
+      setFilters({ ...filters, game: [] });
+    } else {
+      setFilters({ ...filters, game: [games[value][0]] });
+    }
+  };
+
+  const onGameSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+    setFilters({ ...filters, game: [value] });
+  };
+
+  const onTagSelect = (name: string, value: string) => {
+    const duplicatedIndex = getDuplicated(name, value);
+    if (duplicatedIndex > -1) {
+      const newFilters = removeDuplicated(name, duplicatedIndex);
+      setFilters(newFilters);
+    } else {
+      setFilters({ ...filters, [name]: [...filters[name], value] });
+    }
+  };
+
+  const getDuplicated = (name: string, value: string) => {
+    const filter = filters[name];
+    const sameValueIndex = filter.findIndex((val) => val === value);
+    if (sameValueIndex > -1) {
+      return sameValueIndex;
+    } else {
+      return -1;
+    }
+  };
+
+  const removeDuplicated = (name: string, index: number) => {
+    const newFilters = { ...filters };
+    const filter = newFilters[name];
+    filter.splice(index, 1);
+    return newFilters;
   };
 
   return (
@@ -44,7 +90,8 @@ const ProfileFilter = ({ tab }: { tab: string }) => {
           게임
         </Heading>
         <Grid templateColumns="4fr 6fr">
-          <Select w="90%" onChange={onGenreChange}>
+          <Select w="90%" onChange={onGenreSelect}>
+            <option value="all">게임 장르</option>
             {genres &&
               genres.map((genre, idx) => {
                 return (
@@ -54,7 +101,7 @@ const ProfileFilter = ({ tab }: { tab: string }) => {
                 );
               })}
           </Select>
-          <Select>
+          <Select onChange={onGameSelect}>
             {gameList &&
               gameList.map((game, idx) => {
                 return <option key={idx}>{game}</option>;
@@ -68,7 +115,11 @@ const ProfileFilter = ({ tab }: { tab: string }) => {
         </Heading>
         {interests.map((interest, idx) => {
           return (
-            <Tag key={idx} mr="1">
+            <Tag
+              key={idx}
+              mr="1"
+              onClick={() => onTagSelect("interest", interest)}
+            >
               {interest}
             </Tag>
           );
@@ -81,7 +132,7 @@ const ProfileFilter = ({ tab }: { tab: string }) => {
         </Heading>
         {styles.map((style, idx) => {
           return (
-            <Tag key={idx} mr="1">
+            <Tag key={idx} mr="1" onClick={() => onTagSelect("style", style)}>
               {style}
             </Tag>
           );

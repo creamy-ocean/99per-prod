@@ -8,6 +8,7 @@ export interface FormValues {
 }
 
 export interface Profile {
+  [key: string]: string | Array<string>;
   userId: string;
   style: Array<string>;
   interest: Array<string>;
@@ -17,5 +18,9 @@ export interface Profile {
 }
 
 export interface Games {
+  [key: string]: Array<string>;
+}
+
+export interface Filters {
   [key: string]: Array<string>;
 }

@@ -41,9 +41,10 @@ const ProfileList = ({ tab }: { tab: string }) => {
         const found = filters[filterName].every((filterValue) =>
           profile[filterName].includes(filterValue)
         );
-        return found;
+        if (found === false) return false;
       }
     }
+    return true;
   };
 
   return (

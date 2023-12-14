@@ -118,6 +118,9 @@ const ProfileFilter = ({
             <Tag
               key={idx}
               mr="1"
+              colorScheme={
+                filters.interest.includes(interest) ? "blue" : "gray"
+              }
               onClick={() => onTagSelect("interest", interest)}
             >
               {interest}
@@ -132,7 +135,12 @@ const ProfileFilter = ({
         </Heading>
         {styles.map((style, idx) => {
           return (
-            <Tag key={idx} mr="1" onClick={() => onTagSelect("style", style)}>
+            <Tag
+              key={idx}
+              mr="1"
+              colorScheme={filters.style.includes(style) ? "blue" : "gray"}
+              onClick={() => onTagSelect("style", style)}
+            >
               {style}
             </Tag>
           );

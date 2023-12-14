@@ -16,35 +16,15 @@ const ProfileList = ({ tab }: { tab: string }) => {
   });
   const user = useAuthContext();
 
-  const fetchProfiles = async (filters: object) => {
+  const fetchProfiles = async () => {
     const changedTabName = changeTabName(tab);
-    const data = await getProfiles(changedTabName, filters);
+    const data = await getProfiles(changedTabName);
     setProfiles(data);
   };
 
   useEffect(() => {
-    fetchProfiles(filters);
-  }, [filters]);
-
-  const checkFilters = () => {
-    for (const filter in filters) {
-      if (filters[filter].length != 0) return false;
-    }
-    return true;
-  };
-
-  const isFiltersEmpty = checkFilters();
-
-  const checkIfProfileMatchesFilters = (profile: Profile) => {
-    for (const filterName of Object.keys(filters)) {
-      if (filters[filterName].length > 0) {
-        const found = filters[filterName].every((filterValue) =>
-          profile[filterName].includes(filterValue)
-        );
-        return found;
-      }
-    }
-  };
+    fetchProfiles();
+  }, []);
 
   const checkFilters = () => {
     for (const filter in filters) {

@@ -90,7 +90,11 @@ const ProfileFilter = ({
           게임
         </Heading>
         <Grid templateColumns="4fr 6fr">
-          <Select w="90%" onChange={onGenreSelect}>
+          <Select
+            w="90%"
+            style={{ cursor: "pointer" }}
+            onChange={onGenreSelect}
+          >
             <option value="all">게임 장르</option>
             {genres &&
               genres.map((genre, idx) => {
@@ -101,7 +105,7 @@ const ProfileFilter = ({
                 );
               })}
           </Select>
-          <Select onChange={onGameSelect}>
+          <Select style={{ cursor: "pointer" }} onChange={onGameSelect}>
             {gameList &&
               gameList.map((game, idx) => {
                 return <option key={idx}>{game}</option>;
@@ -118,6 +122,7 @@ const ProfileFilter = ({
             <Tag
               key={idx}
               mr="1"
+              style={{ cursor: "pointer" }}
               colorScheme={
                 filters.interest.includes(interest) ? "blue" : "gray"
               }
@@ -138,6 +143,7 @@ const ProfileFilter = ({
             <Tag
               key={idx}
               mr="1"
+              style={{ cursor: "pointer" }}
               colorScheme={filters.style.includes(style) ? "blue" : "gray"}
               onClick={() => onTagSelect("style", style)}
             >

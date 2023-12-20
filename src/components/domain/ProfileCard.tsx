@@ -1,7 +1,8 @@
 import {
   addRequest,
+  cancelRequest,
   checkIfProfileExists,
-  checkIfRequested,
+  getRequestId,
 } from "@/database/firebase";
 import { Profile, UserInterface } from "@/types/types";
 import { Box, Flex, Grid, Img, Tag, Text } from "@chakra-ui/react";
@@ -18,17 +19,18 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
   if (!user?.uid) return;
 
   const { userId, game, image, style, interest, intro } = profile;
-  const [isRequested, setIsRequested] = useState(false);
+  const [requested, setRequested] = useState<string | null>(null);
 
   const checkRequested = async () => {
-    const result = await checkIfRequested(user.uid, userId, tab, game);
-    setIsRequested(result);
+    const result = await getRequestId(user.uid, userId, tab, game);
+    setRequested(result);
   };
 
   const onAddRequest = async () => {
     const isProfileExists = await checkIfProfileExists(user.uid, game);
     if (isProfileExists) {
-      addRequest(user.uid, userId, tab, game);
+      const requestId = await addRequest(user.uid, userId, tab, game);
+      setRequested(requestId);
       const msg = tab === "친구" ? "추가" : tab === "파티" ? "참여" : "가입";
       setAlert(`${tab} ${msg} 요청을 보냈습니다`);
       setTimeout(() => {
@@ -40,6 +42,12 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
         setAlert("");
       }, 5000);
     }
+  };
+
+  const onCancelRequest = async () => {
+    if (!requested) return;
+    cancelRequest(requested);
+    setRequested(null);
   };
 
   useEffect(() => {
@@ -85,8 +93,12 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
         <Text mt="0.5">{intro}</Text>
       </Box>
       <Flex justify="center" align="center" color="grey">
-        {isRequested ? (
-          <i className="fa-solid fa-check"></i>
+        {requested ? (
+          <i
+            className="fa-solid fa-check"
+            style={{ cursor: "pointer" }}
+            onClick={onCancelRequest}
+          ></i>
         ) : (
           <i
             className="fa-solid fa-plus"

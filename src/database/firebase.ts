@@ -14,6 +14,7 @@ import {
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -194,15 +195,20 @@ export const addRequest = async (
   game: string
 ) => {
   const changedTabName = changeTabName(tab);
-  await addDoc(collection(db, "requests"), {
+  const doc = await addDoc(collection(db, "requests"), {
     senderUserId,
     recipientUserId,
     tab: changedTabName,
     game,
   });
+  return doc.id;
 };
 
-export const checkIfRequested = async (
+export const cancelRequest = async (requestDocId: string) => {
+  await deleteDoc(doc(db, "requests", requestDocId));
+};
+
+export const getRequestId = async (
   senderUserId: string,
   recipientUserId: string,
   tab: string,
@@ -218,8 +224,8 @@ export const checkIfRequested = async (
   );
   const snapshot = await getDocs(requestQuery);
   if (snapshot.empty) {
-    return false;
+    return null;
   } else {
-    return true;
+    return snapshot.docs[0].id;
   }
 };

@@ -1,7 +1,11 @@
-import { addRequest, checkIfProfileExists } from "@/database/firebase";
+import {
+  addRequest,
+  checkIfProfileExists,
+  checkIfRequested,
+} from "@/database/firebase";
 import { Profile, UserInterface } from "@/types/types";
 import { Box, Flex, Grid, Img, Tag, Text } from "@chakra-ui/react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 interface ProfileProps {
   profile: Profile;
@@ -11,10 +15,17 @@ interface ProfileProps {
 }
 
 const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
+  if (!user?.uid) return;
+
   const { userId, game, image, style, interest, intro } = profile;
+  const [isRequested, setIsRequested] = useState(false);
+
+  const checkRequested = async () => {
+    const result = await checkIfRequested(user.uid, userId, tab, game);
+    setIsRequested(result);
+  };
 
   const onAddRequest = async () => {
-    if (!user?.uid) return;
     const isProfileExists = await checkIfProfileExists(user.uid, game);
     if (isProfileExists) {
       addRequest(user.uid, userId, tab, game);
@@ -30,6 +41,10 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
       }, 5000);
     }
   };
+
+  useEffect(() => {
+    checkRequested();
+  }, []);
 
   return (
     <Grid
@@ -70,11 +85,15 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
         <Text mt="0.5">{intro}</Text>
       </Box>
       <Flex justify="center" align="center" color="grey">
-        <i
-          className="fa-solid fa-plus"
-          style={{ cursor: "pointer" }}
-          onClick={onAddRequest}
-        ></i>
+        {isRequested ? (
+          <i className="fa-solid fa-check"></i>
+        ) : (
+          <i
+            className="fa-solid fa-plus"
+            style={{ cursor: "pointer" }}
+            onClick={onAddRequest}
+          ></i>
+        )}
       </Flex>
     </Grid>
   );

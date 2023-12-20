@@ -144,7 +144,6 @@ export const getProfiles = async (tab: string) => {
 };
 
 export const checkIfProfileExists = async (userId: string, game: string) => {
-  console.log(game);
   const profileQuery = query(
     collection(db, "friends"),
     where("userId", "==", userId),
@@ -201,4 +200,26 @@ export const addRequest = async (
     tab: changedTabName,
     game,
   });
+};
+
+export const checkIfRequested = async (
+  senderUserId: string,
+  recipientUserId: string,
+  tab: string,
+  game: string
+) => {
+  const changedTabName = changeTabName(tab);
+  const requestQuery = query(
+    collection(db, "requests"),
+    where("senderUserId", "==", senderUserId),
+    where("recipientUserId", "==", recipientUserId),
+    where("tab", "==", changedTabName),
+    where("game", "==", game)
+  );
+  const snapshot = await getDocs(requestQuery);
+  if (snapshot.empty) {
+    return false;
+  } else {
+    return true;
+  }
 };

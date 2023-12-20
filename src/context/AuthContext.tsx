@@ -1,10 +1,6 @@
 import { onUserStateChanged } from "@/database/firebase";
-import { User } from "firebase/auth";
+import { UserInterface } from "@/types/types";
 import React, { useContext, useEffect, useState } from "react";
-
-interface UserInterface extends User {
-  userState: string | null;
-}
 
 const AuthContext = React.createContext<UserInterface | null>(null);
 

@@ -1,3 +1,9 @@
+import { User } from "firebase/auth";
+
+export interface UserInterface extends User {
+  userState: string | null;
+}
+
 export interface FormValues {
   game: string;
   interest: Array<string | undefined>;
@@ -10,6 +16,7 @@ export interface FormValues {
 export interface Profile {
   [key: string]: string | Array<string>;
   userId: string;
+  game: string;
   style: Array<string>;
   interest: Array<string>;
   image: string;

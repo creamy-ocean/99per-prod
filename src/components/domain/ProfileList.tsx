@@ -2,7 +2,14 @@ import { useAuthContext } from "@/context/AuthContext";
 import { getProfiles } from "@/database/firebase";
 import { Filters, Profile } from "@/types/types";
 import { changeTabName } from "@/utils/functions";
-import { Divider, Flex, Grid, Heading } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertIcon,
+  Divider,
+  Flex,
+  Grid,
+  Heading,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
 import ProfileFilter from "./ProfileFilter";
@@ -14,6 +21,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
     interest: [],
     style: [],
   });
+  const [alert, setAlert] = useState<string>("");
   const user = useAuthContext();
 
   const fetchProfiles = async () => {
@@ -71,7 +79,15 @@ const ProfileList = ({ tab }: { tab: string }) => {
               if (profile.userId === user?.uid) {
                 return;
               } else {
-                return <ProfileCard profile={profile} key={idx} />;
+                return (
+                  <ProfileCard
+                    key={idx}
+                    profile={profile}
+                    user={user}
+                    tab={tab}
+                    setAlert={setAlert}
+                  />
+                );
               }
             })
           : profiles.map((profile) => {
@@ -79,12 +95,37 @@ const ProfileList = ({ tab }: { tab: string }) => {
               if (profile.userId === user?.uid) {
                 return;
               } else if (isProfileFiltered) {
-                return <ProfileCard profile={profile}></ProfileCard>;
+                return (
+                  <ProfileCard
+                    profile={profile}
+                    user={user}
+                    tab={tab}
+                    setAlert={setAlert}
+                  />
+                );
               } else {
                 return;
               }
             })}
       </Grid>
+      {alert && (
+        <Alert
+          status="info"
+          mt="6"
+          borderRadius="lg"
+          color="brand.500"
+          fontWeight="bold"
+          style={{
+            width: "50%",
+            maxWidth: "30rem",
+            position: "fixed",
+            bottom: "5%",
+          }}
+        >
+          <AlertIcon />
+          {alert}
+        </Alert>
+      )}
     </Flex>
   );
 };

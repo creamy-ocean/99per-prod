@@ -1,12 +1,61 @@
-import { Profile } from "@/types/types";
+import {
+  addRequest,
+  cancelRequest,
+  checkIfProfileExists,
+  getRequestId,
+} from "@/database/firebase";
+import { Profile, UserInterface } from "@/types/types";
 import { Box, Flex, Grid, Img, Tag, Text } from "@chakra-ui/react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 interface ProfileProps {
   profile: Profile;
+  user: UserInterface | null;
+  tab: string;
+  setAlert: Dispatch<SetStateAction<string>>;
 }
 
-const ProfileCard = ({ profile }: ProfileProps) => {
-  const { image, style, interest, intro } = profile;
+const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
+  if (!user?.uid) return;
+
+  const { userId, game, image, style, interest, intro } = profile;
+  const [requested, setRequested] = useState<string | null>(null);
+
+  const msg = tab === "친구" ? "추가" : tab === "파티" ? "참여" : "가입";
+
+  const setAlertMsg = (msg: string) => {
+    setAlert(msg);
+    setTimeout(() => {
+      setAlert("");
+    }, 5000);
+  };
+
+  const checkRequested = async () => {
+    const result = await getRequestId(user.uid, userId, tab, game);
+    setRequested(result);
+  };
+
+  const onAddRequest = async () => {
+    const isProfileExists = await checkIfProfileExists(user.uid, game);
+    if (isProfileExists) {
+      const requestId = await addRequest(user.uid, userId, tab, game);
+      setRequested(requestId);
+      setAlertMsg(`${tab} ${msg} 요청을 보냈습니다`);
+    } else {
+      setAlertMsg(`${game} 친구 프로필을 먼저 등록해주세요`);
+    }
+  };
+
+  const onCancelRequest = async () => {
+    if (!requested) return;
+    cancelRequest(requested);
+    setAlertMsg(`${tab} ${msg} 요청이 취소되었습니다`);
+    setRequested(null);
+  };
+
+  useEffect(() => {
+    checkRequested();
+  }, []);
 
   return (
     <Grid
@@ -47,7 +96,19 @@ const ProfileCard = ({ profile }: ProfileProps) => {
         <Text mt="0.5">{intro}</Text>
       </Box>
       <Flex justify="center" align="center" color="grey">
-        <i className="fa-solid fa-plus" style={{ cursor: "pointer" }}></i>
+        {requested ? (
+          <i
+            className="fa-solid fa-check"
+            style={{ cursor: "pointer" }}
+            onClick={onCancelRequest}
+          ></i>
+        ) : (
+          <i
+            className="fa-solid fa-plus"
+            style={{ cursor: "pointer" }}
+            onClick={onAddRequest}
+          ></i>
+        )}
       </Flex>
     </Grid>
   );

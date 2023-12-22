@@ -14,6 +14,7 @@ import {
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -23,6 +24,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
@@ -142,6 +144,20 @@ export const getProfiles = async (tab: string) => {
   return profiles;
 };
 
+export const checkIfProfileExists = async (userId: string, game: string) => {
+  const profileQuery = query(
+    collection(db, "friends"),
+    where("userId", "==", userId),
+    where("game", "==", game)
+  );
+  const snapshot = await getDocs(profileQuery);
+  if (snapshot.empty) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
 export const getGenres = async () => {
   const genresQuery = query(collection(db, "genres"));
   const snapshot = await getDocs(genresQuery);
@@ -170,4 +186,46 @@ export const getInterests = async (tab: string) => {
   const snapshot = await getDocs(interestsQuery);
   const interests = snapshot.docs[0].data()[changedTabName];
   return interests;
+};
+
+export const addRequest = async (
+  senderUserId: string,
+  recipientUserId: string,
+  tab: string,
+  game: string
+) => {
+  const changedTabName = changeTabName(tab);
+  const doc = await addDoc(collection(db, "requests"), {
+    senderUserId,
+    recipientUserId,
+    tab: changedTabName,
+    game,
+  });
+  return doc.id;
+};
+
+export const cancelRequest = async (requestDocId: string) => {
+  await deleteDoc(doc(db, "requests", requestDocId));
+};
+
+export const getRequestId = async (
+  senderUserId: string,
+  recipientUserId: string,
+  tab: string,
+  game: string
+) => {
+  const changedTabName = changeTabName(tab);
+  const requestQuery = query(
+    collection(db, "requests"),
+    where("senderUserId", "==", senderUserId),
+    where("recipientUserId", "==", recipientUserId),
+    where("tab", "==", changedTabName),
+    where("game", "==", game)
+  );
+  const snapshot = await getDocs(requestQuery);
+  if (snapshot.empty) {
+    return null;
+  } else {
+    return snapshot.docs[0].id;
+  }
 };

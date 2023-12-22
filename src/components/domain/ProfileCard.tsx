@@ -21,6 +21,15 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
   const { userId, game, image, style, interest, intro } = profile;
   const [requested, setRequested] = useState<string | null>(null);
 
+  const msg = tab === "친구" ? "추가" : tab === "파티" ? "참여" : "가입";
+
+  const setAlertMsg = (msg: string) => {
+    setAlert(msg);
+    setTimeout(() => {
+      setAlert("");
+    }, 5000);
+  };
+
   const checkRequested = async () => {
     const result = await getRequestId(user.uid, userId, tab, game);
     setRequested(result);
@@ -31,22 +40,16 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
     if (isProfileExists) {
       const requestId = await addRequest(user.uid, userId, tab, game);
       setRequested(requestId);
-      const msg = tab === "친구" ? "추가" : tab === "파티" ? "참여" : "가입";
-      setAlert(`${tab} ${msg} 요청을 보냈습니다`);
-      setTimeout(() => {
-        setAlert("");
-      }, 5000);
+      setAlertMsg(`${tab} ${msg} 요청을 보냈습니다`);
     } else {
-      setAlert(`${game} 친구 프로필을 먼저 등록해주세요`);
-      setTimeout(() => {
-        setAlert("");
-      }, 5000);
+      setAlertMsg(`${game} 친구 프로필을 먼저 등록해주세요`);
     }
   };
 
   const onCancelRequest = async () => {
     if (!requested) return;
     cancelRequest(requested);
+    setAlertMsg(`${tab} ${msg} 요청이 취소되었습니다`);
     setRequested(null);
   };
 

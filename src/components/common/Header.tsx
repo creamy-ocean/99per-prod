@@ -13,6 +13,13 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
   Stack,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -85,12 +92,25 @@ const Header = () => {
                 variant={"solid"}
                 backgroundColor="brand.50"
                 size={"sm"}
-                mr={4}
+                mr={2}
                 leftIcon={<AddIcon />}
               >
                 프로필 생성
               </Button>
             </Link>
+            <Popover>
+              <PopoverTrigger>
+                <Button background="none" mr="2">
+                  <i className="fa-solid fa-bell"></i>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent mt="1">
+                <PopoverArrow />
+                <PopoverCloseButton />
+                <PopoverHeader>알림</PopoverHeader>
+                <PopoverBody>알림 내용</PopoverBody>
+              </PopoverContent>
+            </Popover>
             <Menu>
               <MenuButton
                 as={Button}

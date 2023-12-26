@@ -1,5 +1,10 @@
 import { useAuthContext } from "@/context/AuthContext";
-import { logout } from "@/database/firebase";
+import {
+  getNotifications,
+  logout,
+  updateNotiReadOption,
+} from "@/database/firebase";
+import { Noti } from "@/types/types";
 import { AddIcon, CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import {
   Avatar,
@@ -8,6 +13,8 @@ import {
   Flex,
   HStack,
   IconButton,
+  List,
+  ListItem,
   Menu,
   MenuButton,
   MenuDivider,
@@ -21,8 +28,10 @@ import {
   PopoverHeader,
   PopoverTrigger,
   Stack,
+  Text,
   useDisclosure,
 } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 interface Props {
@@ -60,8 +69,26 @@ const NavLink = ({ children }: Props) => {
 };
 
 const Header = () => {
+  const [notiList, setNotiList] = useState<Array<Noti>>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const user = useAuthContext();
+
+  const readNotifications = (notiId?: string) => {
+    if (notiList.length < 1) return;
+    if (notiId) {
+      updateNotiReadOption([notiId]);
+    } else {
+      const notiIdArray = notiList.map((noti) => {
+        return noti.id;
+      });
+      updateNotiReadOption(notiIdArray);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    getNotifications(user.uid, setNotiList);
+  }, []);
 
   return (
     <>
@@ -104,11 +131,45 @@ const Header = () => {
                   <i className="fa-solid fa-bell"></i>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent mt="1">
+              <PopoverContent mt="1" maxWidth="18rem">
                 <PopoverArrow />
                 <PopoverCloseButton />
-                <PopoverHeader>알림</PopoverHeader>
-                <PopoverBody>알림 내용</PopoverBody>
+                <PopoverHeader textAlign="center">알림</PopoverHeader>
+                <PopoverBody textAlign="center">
+                  {notiList.length > 0 ? (
+                    <Flex justify="center" mt="1">
+                      <Button
+                        size="sm"
+                        fontSize="sm"
+                        onClick={() => readNotifications()}
+                      >
+                        모두 읽기
+                      </Button>
+                    </Flex>
+                  ) : (
+                    <Text>새로운 알림이 없습니다</Text>
+                  )}
+                  <List mt="1">
+                    {notiList.map((noti, idx) => {
+                      const msg =
+                        noti.tab === "친구"
+                          ? "추가"
+                          : noti.tab === "파티"
+                          ? "참여"
+                          : "가입";
+                      return (
+                        <ListItem
+                          key={idx}
+                          pt="1"
+                          pb="1"
+                          onClick={() => readNotifications(noti.id)}
+                        >
+                          새로운 {noti.tab} {msg} 요청이 있습니다
+                        </ListItem>
+                      );
+                    })}
+                  </List>
+                </PopoverBody>
               </PopoverContent>
             </Popover>
             <Menu>

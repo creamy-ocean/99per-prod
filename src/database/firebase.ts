@@ -1,4 +1,4 @@
-import { FormValues } from "@/types/types";
+import { FormValues, Noti } from "@/types/types";
 import { config } from "@/utils/config";
 import { changeTabName } from "@/utils/functions";
 import { initializeApp } from "firebase/app";
@@ -19,14 +19,17 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { Dispatch, SetStateAction } from "react";
 
 const firebaseConfig = {
   apiKey: config.firebase.apiKey,
@@ -200,6 +203,7 @@ export const addRequest = async (
     recipientUserId,
     tab: changedTabName,
     game,
+    read: false,
   });
   return doc.id;
 };
@@ -228,4 +232,35 @@ export const getRequestId = async (
   } else {
     return snapshot.docs[0].id;
   }
+};
+
+export const getNotifications = async (
+  userId: string,
+  setNotiList: Dispatch<SetStateAction<Noti[]>>
+) => {
+  const q = query(
+    collection(db, "requests"),
+    where("recipientUserId", "==", userId),
+    where("read", "==", false)
+  );
+  onSnapshot(q, (querySnapshot) => {
+    setNotiList(
+      querySnapshot.docs.map((doc) => {
+        const changedTabName = changeTabName(doc.data().tab);
+        console.log(doc.id);
+        return { ...doc.data(), id: doc.id, tab: changedTabName } as Noti;
+      })
+    );
+  });
+};
+
+export const updateNotiReadOption = async (notiIds: Array<string>) => {
+  const batch = writeBatch(db);
+  for (const notiId of notiIds) {
+    const notiRef = doc(db, "requests", notiId);
+    batch.update(notiRef, {
+      read: true,
+    });
+  }
+  await batch.commit();
 };

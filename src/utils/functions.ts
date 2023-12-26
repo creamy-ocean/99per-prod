@@ -16,3 +16,7 @@ export const changeTabName = (tab: string) => {
       return "";
   }
 };
+
+export const isArrayEmpty = (array: Array<any>) => {
+  return array.length > 0 ? false : true;
+};

@@ -5,6 +5,7 @@ import {
   updateNotiReadOption,
 } from "@/database/firebase";
 import { Noti } from "@/types/types";
+import { isArrayEmpty } from "@/utils/functions";
 import { AddIcon, CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import {
   Avatar,
@@ -74,7 +75,7 @@ const Header = () => {
   const user = useAuthContext();
 
   const readNotifications = (notiId?: string) => {
-    if (notiList.length < 1) return;
+    if (isArrayEmpty(notiList)) return;
     if (notiId) {
       updateNotiReadOption([notiId]);
     } else {
@@ -129,6 +130,16 @@ const Header = () => {
               <PopoverTrigger>
                 <Button background="none" mr="2">
                   <i className="fa-solid fa-bell"></i>
+                  <Box
+                    w="5"
+                    borderRadius="full"
+                    backgroundColor="brand.500"
+                    pos="absolute"
+                    top="0.5"
+                    right="0.5"
+                  >
+                    {!isArrayEmpty(notiList) && notiList?.length}
+                  </Box>
                 </Button>
               </PopoverTrigger>
               <PopoverContent mt="1" maxWidth="18rem">
@@ -136,7 +147,7 @@ const Header = () => {
                 <PopoverCloseButton />
                 <PopoverHeader textAlign="center">알림</PopoverHeader>
                 <PopoverBody textAlign="center">
-                  {notiList.length > 0 ? (
+                  {!isArrayEmpty(notiList) ? (
                     <Flex justify="center" mt="1">
                       <Button
                         size="sm"

@@ -135,6 +135,7 @@ export const getProfiles = async (tab: string) => {
   const profiles = snapshot.docs.map((doc) => {
     const { userId, game, style, interest, image, intro, contact } = doc.data();
     return {
+      id: doc.id,
       userId,
       game,
       style,
@@ -263,4 +264,9 @@ export const updateNotiReadOption = async (notiIds: Array<string>) => {
     });
   }
   await batch.commit();
+};
+
+export const deleteProfile = async (id: string, tab: string) => {
+  const changedTabName = changeTabName(tab);
+  await deleteDoc(doc(db, changedTabName, id));
 };

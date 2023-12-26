@@ -28,6 +28,7 @@ import {
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { useLocation } from "react-router-dom";
 import { array, mixed, object, string } from "yup";
 
 const REG_EXP = /^((?![%=*><]).)*$/g;
@@ -76,6 +77,8 @@ const formSchema = object()
       .required(),
   })
   .required();
+
+const profile = useLocation().state?.profile;
 
 const NewProfile = () => {
   const [currTab, setCurrTab] = useState<string>("친구");

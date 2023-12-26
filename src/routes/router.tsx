@@ -7,6 +7,7 @@ import NewProfile from "@/pages/NewProfile";
 import Parties from "@/pages/Parties";
 import Root from "@/pages/Root";
 import Guilds from "@/pages/guilds";
+import MyProfiles from "@/pages/myProfiles";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -30,6 +31,7 @@ const router = createBrowserRouter([
       { path: "/guilds", element: <Guilds /> },
       { path: "/parties", element: <Parties /> },
       { path: "/newProfile", element: <NewProfile /> },
+      { path: "/myProfiles", element: <MyProfiles /> },
     ],
   },
 ]);

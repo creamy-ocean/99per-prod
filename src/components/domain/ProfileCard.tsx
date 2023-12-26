@@ -7,24 +7,34 @@ import {
 import { Profile, UserInterface } from "@/types/types";
 import { Box, Flex, Grid, Img, Tag, Text } from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface ProfileProps {
   profile: Profile;
   user: UserInterface | null;
   tab: string;
   setAlert: Dispatch<SetStateAction<string>>;
+  isOwner?: boolean;
+  deleteProfile?: (id: string) => void;
 }
 
-const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
+const ProfileCard = ({
+  profile,
+  user,
+  tab,
+  setAlert,
+  isOwner,
+  deleteProfile,
+}: ProfileProps) => {
   if (!user?.uid) return;
 
-  const { userId, game, image, style, interest, intro } = profile;
+  const { id, userId, game, image, style, interest, intro } = profile;
   const [requested, setRequested] = useState<string | null>(null);
 
   const msg = tab === "친구" ? "추가" : tab === "파티" ? "참여" : "가입";
 
-  const setAlertMsg = (msg: string) => {
-    setAlert(msg);
+  const setAlertMsg = (alertMsg: string) => {
+    setAlert(alertMsg);
     setTimeout(() => {
       setAlert("");
     }, 5000);
@@ -51,6 +61,11 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
     cancelRequest(requested);
     setAlertMsg(`${tab} ${msg} 요청이 취소되었습니다`);
     setRequested(null);
+  };
+
+  const onDeleteProfile = () => {
+    deleteProfile && deleteProfile(id);
+    setAlertMsg("프로필이 삭제되었습니다");
   };
 
   useEffect(() => {
@@ -95,19 +110,26 @@ const ProfileCard = ({ profile, user, tab, setAlert }: ProfileProps) => {
         })}
         <Text mt="0.5">{intro}</Text>
       </Box>
-      <Flex justify="center" align="center" color="grey">
-        {requested ? (
-          <i
-            className="fa-solid fa-check"
-            style={{ cursor: "pointer" }}
-            onClick={onCancelRequest}
-          ></i>
+      <Flex
+        justify="center"
+        align="center"
+        color="grey"
+        sx={{ i: { cursor: "pointer" } }}
+      >
+        {isOwner ? (
+          <>
+            <Link to="/newProfile" state={{ profile }}>
+              <i
+                className="fa-solid fa-pen-to-square"
+                style={{ marginRight: "1rem" }}
+              ></i>
+            </Link>
+            <i className="fa-solid fa-trash-can" onClick={onDeleteProfile}></i>
+          </>
+        ) : requested ? (
+          <i className="fa-solid fa-check" onClick={onCancelRequest}></i>
         ) : (
-          <i
-            className="fa-solid fa-plus"
-            style={{ cursor: "pointer" }}
-            onClick={onAddRequest}
-          ></i>
+          <i className="fa-solid fa-plus" onClick={onAddRequest}></i>
         )}
       </Flex>
     </Grid>

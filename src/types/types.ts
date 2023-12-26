@@ -31,3 +31,12 @@ export interface Games {
 export interface Filters {
   [key: string]: Array<string>;
 }
+
+export interface Noti {
+  id: string;
+  recipientUserId: string;
+  senderUserId: string;
+  tab: string;
+  game: string;
+  read: boolean;
+}

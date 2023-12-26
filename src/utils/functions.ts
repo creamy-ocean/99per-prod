@@ -6,7 +6,17 @@ export const changeTabName = (tab: string) => {
       return "parties";
     case "길드":
       return "guilds";
+    case "friends":
+      return "친구";
+    case "parties":
+      return "파티";
+    case "guilds":
+      return "길드";
     default:
       return "";
   }
+};
+
+export const isArrayEmpty = (array: Array<any>) => {
+  return array.length > 0 ? false : true;
 };

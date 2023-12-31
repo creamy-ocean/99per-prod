@@ -133,10 +133,13 @@ export const getProfiles = async (tab: string) => {
   );
   const snapshot = await getDocs(profilesQuery);
   const profiles = snapshot.docs.map((doc) => {
-    const { userId, game, style, interest, image, intro, contact } = doc.data();
+    const { userId, game, genre, style, interest, image, intro, contact } =
+      doc.data();
     return {
       id: doc.id,
       userId,
+      genre,
+      tab: changeTabName(tab),
       game,
       style,
       interest,
@@ -264,6 +267,30 @@ export const updateNotiReadOption = async (notiIds: Array<string>) => {
     });
   }
   await batch.commit();
+};
+
+export const updateProfile = async (
+  userId: string | undefined,
+  docId: string,
+  tab: string,
+  values: FormValues
+) => {
+  const changedTabName = changeTabName(tab);
+  const { image, ...restValues } = values;
+  const profileRef = doc(db, changedTabName, docId);
+  await updateDoc(profileRef, { ...restValues });
+  if (image) {
+    const result = await uploadProfileImage(
+      changedTabName,
+      image[0],
+      userId,
+      docId
+    );
+    const url = await getDownloadURL(result.ref);
+    await updateDoc(profileRef, {
+      image: url,
+    });
+  }
 };
 
 export const deleteProfile = async (id: string, tab: string) => {

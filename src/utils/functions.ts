@@ -12,6 +12,10 @@ export const changeTabName = (tab: string) => {
       return "파티";
     case "guilds":
       return "길드";
+    case "보낸 요청":
+      return "sent";
+    case "받은 요청":
+      return "received";
     default:
       return "";
   }

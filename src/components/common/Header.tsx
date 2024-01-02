@@ -194,7 +194,7 @@ const Header = () => {
                 {user?.photoURL ? (
                   <Avatar size={"sm"} src={user.photoURL} />
                 ) : (
-                  <Box>{user?.displayName?.substring(0, 2)}</Box>
+                  <Box>{user?.uid?.substring(0, 2)}</Box>
                 )}
               </MenuButton>
               <MenuList>

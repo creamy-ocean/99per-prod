@@ -196,6 +196,7 @@ export const getInterests = async (tab: string) => {
 };
 
 export const addRequest = async (
+  profileId: string,
   senderUserId: string,
   recipientUserId: string,
   tab: string,
@@ -203,6 +204,7 @@ export const addRequest = async (
 ) => {
   const changedTabName = changeTabName(tab);
   const doc = await addDoc(collection(db, "requests"), {
+    profileId,
     senderUserId,
     recipientUserId,
     tab: changedTabName,

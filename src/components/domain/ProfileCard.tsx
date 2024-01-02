@@ -48,7 +48,13 @@ const ProfileCard = ({
   const onAddRequest = async () => {
     const isProfileExists = await checkIfProfileExists(user.uid, game);
     if (isProfileExists) {
-      const requestId = await addRequest(user.uid, userId, tab, game);
+      const requestId = await addRequest(
+        profile.id,
+        user.uid,
+        userId,
+        tab,
+        game
+      );
       setRequested(requestId);
       setAlertMsg(`${tab} ${msg} 요청을 보냈습니다`);
     } else {

@@ -98,6 +98,8 @@ const ProfileCard = ({
         {image ? (
           <Img
             src={image}
+            w="100%"
+            h="100%"
             maxW="4rem"
             maxH="4rem"
             borderRadius="full"

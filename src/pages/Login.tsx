@@ -1,7 +1,13 @@
-import { login } from "@/database/firebase";
+import { useAuthContext } from "@/context/AuthContext";
+import { anonymousLogin, login } from "@/database/firebase";
 import { Card, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { useEffect } from "react";
 
 const Login = () => {
+  const user = useAuthContext();
+
+  useEffect(() => {}, [user]);
+
   return (
     <Flex
       direction="column"
@@ -31,9 +37,6 @@ const Login = () => {
           </Text>
         </Flex>
       </Card>
-      {/* <Card mt="1rem" cursor="pointer">
-          <Image src="public/assets/kakao_login.png" />
-        </Card> */}
       <Card
         mt="1rem"
         w="11.5rem"
@@ -46,6 +49,20 @@ const Login = () => {
           <Image ml="2" src="/assets/x_logo.png" height="1.2rem" />
           <Text color="white" variant="google-login" ml="7">
             X 로그인
+          </Text>
+        </Flex>
+      </Card>
+      <Card
+        mt="1rem"
+        w="11.5rem"
+        p="0.7rem 0.5rem"
+        cursor="pointer"
+        background="brand.500"
+        onClick={() => anonymousLogin()}
+      >
+        <Flex alignItems="center" justify="center">
+          <Text color="white" variant="google-login">
+            익명 로그인
           </Text>
         </Flex>
       </Card>

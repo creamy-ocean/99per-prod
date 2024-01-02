@@ -8,6 +8,7 @@ import {
   TwitterAuthProvider,
   getAuth,
   onAuthStateChanged,
+  signInAnonymously,
   signInWithPopup,
   signOut,
 } from "firebase/auth";
@@ -61,6 +62,16 @@ export const login = (platform: string) => {
     .then(({ user }) => {
       getUserState(user.uid).then((userState) => {
         !userState && addUserState(user.uid, "joined");
+      });
+    })
+    .catch(console.error);
+};
+
+export const anonymousLogin = () => {
+  signInAnonymously(auth)
+    .then(({ user }) => {
+      getUserState(user.uid).then((userState) => {
+        !userState && addUserState(user.uid, "certified");
       });
     })
     .catch(console.error);

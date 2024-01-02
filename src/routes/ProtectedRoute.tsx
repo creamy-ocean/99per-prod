@@ -10,28 +10,31 @@ const ProtectedRoute = ({ children, page }: Props) => {
   const user = useAuthContext();
   const userState = user?.userState;
 
-  if (page === "join") {
-    return userState ? (
-      user.userState === "joined" ? (
-        <Navigate to="/certify" replace={true} />
-      ) : (
-        <Navigate to="/friends" replace={true} />
-      )
-    ) : (
-      children
-    );
-  } else if (page === "certify") {
-    return userState ? (
-      user.userState === "certified" ? (
-        <Navigate to="/friends" replace={true} />
+  switch (page) {
+    case "join":
+      return userState ? (
+        user.userState === "joined" ? (
+          <Navigate to="/certify" replace={true} />
+        ) : (
+          <Navigate to="/friends" replace={true} />
+        )
       ) : (
         children
-      )
-    ) : (
-      <Navigate to="/" replace={true} />
-    );
-  } else {
-    return userState ? children : <Navigate to="/" replace={true} />;
+      );
+    case "certify":
+      return userState ? (
+        user.userState === "certified" ? (
+          <Navigate to="/friends" replace={true} />
+        ) : (
+          children
+        )
+      ) : (
+        <Navigate to="/" replace={true} />
+      );
+    case "home":
+      return userState ? <Navigate to="/friends" replace={true} /> : children;
+    default:
+      return userState ? children : <Navigate to="/" replace={true} />;
   }
 };
 

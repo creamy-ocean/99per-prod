@@ -18,7 +18,14 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <Home /> },
+      {
+        index: true,
+        element: (
+          <ProtectedRoute page={"home"}>
+            <Home />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: "/join",
         element: (

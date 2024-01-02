@@ -102,7 +102,6 @@ const NewProfile = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [currTab, setCurrTab] = useState<string>("친구");
-  const [error, setError] = useState();
   const [imgPreview, setImgPreview] = useState<string>(
     profile ? profile.image : ""
   );
@@ -114,6 +113,7 @@ const NewProfile = () => {
   ]);
   const [styles, setStyles] = useState<Array<string>>([]);
   const [interests, setInterests] = useState<Array<string>>([]);
+  const [alert, setAlert] = useState<string>("");
 
   const helperText =
     currTab === "친구" ? "나" : currTab === "파티" ? "우리 파티" : "우리 길드";
@@ -191,20 +191,30 @@ const NewProfile = () => {
     setValue("genre", value);
   };
 
-  const onSubmit: SubmitHandler<FormValues> = async (formValues) => {
-    try {
-      profile
-        ? await updateProfile(user?.uid, profile.id, profile.tab, formValues)
-        : await addProfile(currTab, user?.uid, formValues);
-    } catch (e: any) {
-      setError(e.message);
-    }
-  };
-
   const onTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     e.key === "Enter" && e.preventDefault();
   };
 
+  const onSubmit: SubmitHandler<FormValues> = async (formValues) => {
+    try {
+      if (profile) {
+        await updateProfile(user?.uid, profile.id, profile.tab, formValues);
+        setAlertMsg("프로필이 수정되었습니다");
+      } else {
+        await addProfile(currTab, user?.uid, formValues);
+        setAlertMsg("프로필이 생성되었습니다");
+      }
+    } catch (e: any) {
+      setAlertMsg(e.message);
+    }
+  };
+
+  const setAlertMsg = (alertMsg: string) => {
+    setAlert(alertMsg);
+    setTimeout(() => {
+      setAlert("");
+    }, 5000);
+  };
   return (
     <Flex
       direction="column"
@@ -520,25 +530,31 @@ const NewProfile = () => {
               </FormHelperText>
             )}
           </FormControl>
-          {error && (
-            <Alert
-              status="info"
-              mt="6"
-              borderRadius="lg"
-              color="brand.500"
-              fontWeight="bold"
-            >
-              <AlertIcon />
-              {error}
-            </Alert>
-          )}
           <Flex justify="end" mt="6">
             <Button size="md" type="submit" isLoading={isSubmitting}>
-              만들기
+              {profile ? "수정하기" : "만들기"}
             </Button>
           </Flex>
         </form>
       </Box>
+      {alert && (
+        <Alert
+          status="info"
+          mt="6"
+          borderRadius="lg"
+          color="brand.500"
+          fontWeight="bold"
+          style={{
+            width: "50%",
+            maxWidth: "30rem",
+            position: "fixed",
+            bottom: "5%",
+          }}
+        >
+          <AlertIcon />
+          {alert}
+        </Alert>
+      )}
     </Flex>
   );
 };

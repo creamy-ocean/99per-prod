@@ -201,6 +201,9 @@ const Header = () => {
                 <Link to="/myProfiles">
                   <MenuItem>내 프로필</MenuItem>
                 </Link>
+                <Link to="/myRequests">
+                  <MenuItem>내 요청</MenuItem>
+                </Link>
                 <MenuDivider />
                 <MenuItem onClick={logout}>로그아웃</MenuItem>
               </MenuList>

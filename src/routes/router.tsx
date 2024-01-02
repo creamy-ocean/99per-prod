@@ -3,11 +3,12 @@ import ErrorPage from "@/pages/ErrorPage";
 import Friends from "@/pages/Friends";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
+import MyProfiles from "@/pages/MyProfiles";
+import MyRequests from "@/pages/MyRequests";
 import NewProfile from "@/pages/NewProfile";
 import Parties from "@/pages/Parties";
 import Root from "@/pages/Root";
 import Guilds from "@/pages/guilds";
-import MyProfiles from "@/pages/myProfiles";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { path: "/parties", element: <Parties /> },
       { path: "/newProfile", element: <NewProfile /> },
       { path: "/myProfiles", element: <MyProfiles /> },
+      { path: "/myRequests", element: <MyRequests /> },
     ],
   },
 ]);

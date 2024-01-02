@@ -55,6 +55,8 @@ const ProfileList = ({ tab }: { tab: string }) => {
     return true;
   };
 
+  console.log(profiles);
+
   return (
     <Flex
       backgroundColor="#fff"

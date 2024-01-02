@@ -15,6 +15,7 @@ export interface FormValues {
 
 export interface Profile {
   [key: string]: string | Array<string>;
+  id: string;
   userId: string;
   game: string;
   style: Array<string>;

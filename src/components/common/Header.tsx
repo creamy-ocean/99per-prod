@@ -198,7 +198,7 @@ const Header = () => {
                 )}
               </MenuButton>
               <MenuList>
-                <Link to="/profiles">
+                <Link to="/myProfiles">
                   <MenuItem>내 프로필</MenuItem>
                 </Link>
                 <MenuDivider />

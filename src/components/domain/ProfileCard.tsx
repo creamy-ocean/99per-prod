@@ -16,6 +16,7 @@ interface ProfileProps {
   setAlert: Dispatch<SetStateAction<string>>;
   isOwner?: boolean;
   deleteProfile?: (id: string) => void;
+  setProfiles?: Dispatch<SetStateAction<Profile[]>>;
 }
 
 const ProfileCard = ({
@@ -25,6 +26,7 @@ const ProfileCard = ({
   setAlert,
   isOwner,
   deleteProfile,
+  setProfiles,
 }: ProfileProps) => {
   if (!user?.uid) return;
 
@@ -67,6 +69,12 @@ const ProfileCard = ({
     cancelRequest(requested);
     setAlertMsg(`${tab} ${msg} 요청이 취소되었습니다`);
     setRequested(null);
+    setProfiles &&
+      setProfiles((prev) => {
+        return prev.filter((p) => {
+          p.id !== profile.id;
+        });
+      });
   };
 
   const onDeleteProfile = () => {

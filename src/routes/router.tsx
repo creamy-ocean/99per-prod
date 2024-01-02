@@ -22,18 +22,67 @@ const router = createBrowserRouter([
       {
         path: "/join",
         element: (
-          <ProtectedRoute certRequired>
+          <ProtectedRoute page={"join"}>
             <Login />
           </ProtectedRoute>
         ),
       },
-      { path: "/certify", element: <Certify /> },
-      { path: "/friends", element: <Friends /> },
-      { path: "/guilds", element: <Guilds /> },
-      { path: "/parties", element: <Parties /> },
-      { path: "/newProfile", element: <NewProfile /> },
-      { path: "/myProfiles", element: <MyProfiles /> },
-      { path: "/myRequests", element: <MyRequests /> },
+      {
+        path: "/certify",
+        element: (
+          <ProtectedRoute page={"certify"}>
+            <Certify />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/friends",
+        element: (
+          <ProtectedRoute>
+            <Friends />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/guilds",
+        element: (
+          <ProtectedRoute>
+            <Guilds />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/parties",
+        element: (
+          <ProtectedRoute>
+            <Parties />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/newProfile",
+        element: (
+          <ProtectedRoute>
+            <NewProfile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/myProfiles",
+        element: (
+          <ProtectedRoute>
+            <MyProfiles />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/myRequests",
+        element: (
+          <ProtectedRoute>
+            <MyRequests />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);

@@ -48,7 +48,7 @@ interface Providers {
 const app = initializeApp(firebaseConfig);
 const googleProvider = new GoogleAuthProvider();
 const twitterProvider = new TwitterAuthProvider();
-const auth = getAuth();
+export const auth = getAuth();
 const db = getFirestore(app);
 const storage = getStorage();
 
@@ -57,22 +57,22 @@ const providers: Providers = {
   twitter: twitterProvider,
 };
 
-export const login = (platform: string) => {
+export const login = (platform: string, callback: any) => {
   signInWithPopup(auth, providers[platform])
     .then(({ user }) => {
       getUserState(user.uid).then((userState) => {
         !userState && addUserState(user.uid, "joined");
       });
+      callback();
     })
     .catch(console.error);
 };
 
-export const anonymousLogin = () => {
+export const anonymousLogin = (callback: any) => {
   signInAnonymously(auth)
     .then(({ user }) => {
-      getUserState(user.uid).then((userState) => {
-        !userState && addUserState(user.uid, "certified");
-      });
+      addUserState(user.uid, "certified");
+      callback();
     })
     .catch(console.error);
 };
@@ -100,7 +100,7 @@ export const getUserState = async (userId: string) => {
     const userState = docSnap.data().state;
     return userState;
   } else {
-    return null;
+    return "joined";
   }
 };
 

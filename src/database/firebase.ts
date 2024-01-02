@@ -58,8 +58,10 @@ const providers: Providers = {
 
 export const login = (platform: string) => {
   signInWithPopup(auth, providers[platform])
-    .then((userCredential) => {
-      addUserState(userCredential.user.uid, "joined");
+    .then(({ user }) => {
+      getUserState(user.uid).then((userState) => {
+        !userState && addUserState(user.uid, "joined");
+      });
     })
     .catch(console.error);
 };

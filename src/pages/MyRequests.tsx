@@ -32,9 +32,6 @@ const MyRequests = () => {
       changedFirstTabName,
       changedSecondTabName
     );
-    console.log(data);
-    const filtered = data.filter((d) => d.tab === secondTab);
-
     setProfiles(
       firstTab === "받은 요청" ? data.filter((d) => d.tab === secondTab) : data
     );

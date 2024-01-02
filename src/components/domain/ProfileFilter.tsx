@@ -122,6 +122,7 @@ const ProfileFilter = ({
             <Tag
               key={idx}
               mr="1"
+              mt="1"
               style={{ cursor: "pointer" }}
               colorScheme={
                 filters.interest.includes(interest) ? "blue" : "gray"
@@ -143,6 +144,7 @@ const ProfileFilter = ({
             <Tag
               key={idx}
               mr="1"
+              mt="1"
               style={{ cursor: "pointer" }}
               colorScheme={filters.style.includes(style) ? "blue" : "gray"}
               onClick={() => onTagSelect("style", style)}

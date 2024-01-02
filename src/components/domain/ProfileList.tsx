@@ -55,8 +55,6 @@ const ProfileList = ({ tab }: { tab: string }) => {
     return true;
   };
 
-  console.log(profiles);
-
   return (
     <Flex
       backgroundColor="#fff"
@@ -69,7 +67,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
       align="center"
       borderRadius="xl"
     >
-      <Heading fontSize="3xl" color="#555" pt="6" pb="4">
+      <Heading textAlign="center" fontSize="3xl" color="#555" pt="6" pb="4">
         나와 잘 맞는 {tab}를 찾아보세요
       </Heading>
       <Divider w="80%" mt="4" mb="8" />

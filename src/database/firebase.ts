@@ -298,9 +298,30 @@ export const updateProfile = async (
   }
 };
 
-export const deleteProfile = async (id: string, tab: string) => {
+export const deleteProfile = async (
+  id: string,
+  tab: string,
+  userId: string | undefined
+) => {
+  console.log(userId);
+  if (!userId) return;
   const changedTabName = changeTabName(tab);
   await deleteDoc(doc(db, changedTabName, id));
+  await deleteRequest("recipientUserId", userId);
+  await deleteRequest("senderUserId", userId);
+};
+
+const deleteRequest = async (fieldName: string, userId: string) => {
+  const requestQuery = query(
+    collection(db, "requests"),
+    where(fieldName, "==", userId)
+  );
+  const snapshot = await getDocs(requestQuery);
+  if (snapshot.empty) {
+    return;
+  } else {
+    return await deleteDoc(doc(db, "requests", snapshot.docs[0].id));
+  }
 };
 
 export const getProfilesFromRequests = async (

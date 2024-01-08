@@ -1,5 +1,9 @@
 import { useAuthContext } from "@/context/AuthContext";
-import { getProfilesFromRequests } from "@/database/firebase";
+import {
+  addRelationship,
+  deleteRequest,
+  getProfilesFromRequests,
+} from "@/database/firebase";
 import { Profile } from "@/types/types";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import {
@@ -26,7 +30,6 @@ const MyRequests = () => {
   const user = useAuthContext();
 
   const fetchProfiles = async () => {
-    console.log("fetchProfiles");
     const changedFirstTabName = changeTabName(firstTab);
     const changedSecondTabName = changeTabName(secondTab);
     const data = await getProfilesFromRequests(
@@ -34,17 +37,30 @@ const MyRequests = () => {
       changedFirstTabName,
       changedSecondTabName
     );
-    setProfiles(
-      firstTab === "받은 요청" ? data.filter((d) => d.tab === secondTab) : data
-    );
+    setProfiles(data.filter((d) => d.tab === secondTab));
   };
 
   const changeTab = (type: string, e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log("changeTab");
     const eventTarget = e.target as HTMLButtonElement;
     type === "requestType"
       ? setFirstTab(eventTarget.innerText)
       : setSecondTab(eventTarget.innerText);
+  };
+
+  const approveRequest = (
+    requestId: string,
+    profileId: string,
+    tab: string
+  ) => {
+    deleteRequest(requestId);
+    addRelationship(profileId, user?.uid, tab);
+    setProfiles((prev) => prev.filter((p) => p.id !== profileId));
+  };
+
+  const rejectRequest = (requestId: string, profileId: string) => {
+    console.log("onReject", requestId, profileId);
+    deleteRequest(requestId);
+    setProfiles((prev) => prev.filter((p) => p.id !== profileId));
   };
 
   useEffect(() => {
@@ -96,6 +112,9 @@ const MyRequests = () => {
                 profile={profile}
                 user={user}
                 tab={secondTab}
+                isReceived={firstTab === "받은 요청" ? true : false}
+                approveRequest={approveRequest}
+                rejectRequest={rejectRequest}
                 setAlert={setAlert}
                 setProfiles={setProfiles}
               />

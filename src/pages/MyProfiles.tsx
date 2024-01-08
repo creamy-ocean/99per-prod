@@ -36,7 +36,7 @@ const MyProfiles = () => {
   };
 
   const onDeleteProfile = (profileId: string) => {
-    deleteProfile(profileId, currTab);
+    deleteProfile(profileId, currTab, user?.uid);
     setProfiles(
       profiles.filter((profile) => {
         return profile.id !== profileId;

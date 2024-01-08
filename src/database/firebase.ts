@@ -154,7 +154,7 @@ export const getProfiles = async (tab: string) => {
   return profiles;
 };
 
-export const checkIfProfileExists = async (userId: string, game: string) => {
+export const getProfileId = async (userId: string, game: string) => {
   const profileQuery = query(
     collection(db, "friends"),
     where("userId", "==", userId),
@@ -162,9 +162,9 @@ export const checkIfProfileExists = async (userId: string, game: string) => {
   );
   const snapshot = await getDocs(profileQuery);
   if (snapshot.empty) {
-    return false;
+    return null;
   } else {
-    return true;
+    return snapshot.docs[0].id;
   }
 };
 
@@ -256,7 +256,6 @@ export const getNotifications = async (
     setNotiList(
       querySnapshot.docs.map((doc) => {
         const changedTabName = changeTabName(doc.data().tab);
-        console.log(doc.id);
         return { ...doc.data(), id: doc.id, tab: changedTabName } as Noti;
       })
     );
@@ -298,9 +297,39 @@ export const updateProfile = async (
   }
 };
 
-export const deleteProfile = async (id: string, tab: string) => {
+export const deleteProfile = async (
+  id: string,
+  tab: string,
+  userId: string | undefined
+) => {
+  console.log(userId);
+  if (!userId) return;
   const changedTabName = changeTabName(tab);
   await deleteDoc(doc(db, changedTabName, id));
+  await deleteRequest("recipientUserId", userId);
+  await deleteRequest("senderUserId", userId);
+};
+
+export const deleteRequest = async (
+  requestId?: string,
+  fieldName?: string,
+  userId?: string
+) => {
+  console.log("deleteRequest");
+  if (requestId) {
+    deleteDoc(doc(db, `requests/${requestId}`));
+  } else if (fieldName) {
+    const requestQuery = query(
+      collection(db, "requests"),
+      where(fieldName, "==", userId)
+    );
+    const snapshot = await getDocs(requestQuery);
+    if (snapshot.empty) {
+      return;
+    } else {
+      return await deleteDoc(doc(db, "requests", snapshot.docs[0].id));
+    }
+  }
 };
 
 export const getProfilesFromRequests = async (
@@ -308,71 +337,49 @@ export const getProfilesFromRequests = async (
   type: string,
   tab: string
 ) => {
-  if (type === "received") {
-    const { senderUserIds, senderUserTabs } =
-      await getSenderUserInfosFromRequests(userId);
-    if (isArrayEmpty(Object.keys(senderUserIds))) {
-      return [];
-    }
-    const profilesQuery = query(
-      // 받은 요청의 경우 파티, 길드 요청도 친구 프로필로 노출되어야 하기 때문
-      collection(db, "friends"),
-      where("userId", "in", senderUserIds)
-    );
-    const snapshot = await getDocs(profilesQuery);
-    const profiles = snapshot.docs.map((doc, idx) => {
-      const { userId, genre, game, style, interest, image, intro, contact } =
-        doc.data();
-      return {
-        id: doc.id,
-        userId,
-        genre,
-        tab: changeTabName(senderUserTabs[idx]),
-        game,
-        style,
-        interest,
-        image,
-        intro,
-        contact,
-      };
-    });
-    return profiles;
-  } else {
-    const profileIds = await getProfileIdsFromRequests(userId);
-    if (isArrayEmpty(profileIds)) {
-      return [];
-    }
-    const profilesQuery = query(
-      collection(db, tab),
-      where(documentId(), "in", profileIds)
-    );
-    const snapshot = await getDocs(profilesQuery);
-    const profiles = snapshot.docs.map((doc) => {
-      const { userId, game, genre, style, interest, image, intro, contact } =
-        doc.data();
-      return {
-        id: doc.id,
-        userId,
-        genre,
-        tab: changeTabName(tab),
-        game,
-        style,
-        interest,
-        image,
-        intro,
-        contact,
-      };
-    });
-    return profiles;
+  const profileIds = await getProfileIdsFromRequests(userId, type, tab);
+  if (isArrayEmpty(profileIds)) {
+    return [];
   }
+  const profilesQuery = query(
+    collection(db, type === "received" ? "friends" : tab),
+    where(documentId(), "in", profileIds)
+  );
+  const snapshot = await getDocs(profilesQuery);
+  const profiles = snapshot.docs.map((doc) => {
+    const { userId, game, genre, style, interest, image, intro, contact } =
+      doc.data();
+    return {
+      id: doc.id,
+      userId,
+      genre,
+      tab: changeTabName(tab),
+      game,
+      style,
+      interest,
+      image,
+      intro,
+      contact,
+    };
+  });
+  return profiles;
 };
 
-const getProfileIdsFromRequests = async (userId: string | undefined) => {
+const getProfileIdsFromRequests = async (
+  userId: string | undefined,
+  type: string,
+  tab: string
+) => {
   const requestsQuery = query(
     collection(db, "requests"),
-    where("senderUserId", "==", userId),
-    where("read", "==", false)
+    where(
+      type === "received" ? "recipientUserId" : "senderUserId",
+      "==",
+      userId
+    ),
+    where("tab", "==", tab)
   );
+
   const snapshot = await getDocs(requestsQuery);
   const profileIds = snapshot.docs.map((doc) => {
     const { profileId } = doc.data();
@@ -381,20 +388,14 @@ const getProfileIdsFromRequests = async (userId: string | undefined) => {
   return profileIds;
 };
 
-const getSenderUserInfosFromRequests = async (userId: string | undefined) => {
-  const requestsQuery = query(
-    collection(db, "requests"),
-    where("recipientUserId", "==", userId),
-    where("read", "==", false)
-  );
-  const snapshot = await getDocs(requestsQuery);
-  const senderUserIds = snapshot.docs.map((doc) => {
-    const { senderUserId } = doc.data();
-    return senderUserId;
+export const addRelationship = async (
+  profileId: string,
+  userId: string | undefined,
+  tab: string
+) => {
+  const changedTabName = changeTabName(tab);
+  await addDoc(collection(db, `relationships/${changedTabName}/${userId}`), {
+    profileId,
+    createdAt: serverTimestamp(),
   });
-  const senderUserTabs = snapshot.docs.map((doc) => {
-    const { tab } = doc.data();
-    return tab;
-  });
-  return { senderUserIds, senderUserTabs };
 };

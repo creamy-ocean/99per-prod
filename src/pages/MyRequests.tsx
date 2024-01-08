@@ -1,5 +1,9 @@
 import { useAuthContext } from "@/context/AuthContext";
-import { getProfilesFromRequests } from "@/database/firebase";
+import {
+  addRelationship,
+  deleteRequest,
+  getProfilesFromRequests,
+} from "@/database/firebase";
 import { Profile } from "@/types/types";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import {
@@ -22,6 +26,7 @@ const MyRequests = () => {
   const [firstTab, setFirstTab] = useState<string>("보낸 요청");
   const [secondTab, setSecondTab] = useState<string>("친구");
   const [alert, setAlert] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const user = useAuthContext();
 
   const fetchProfiles = async () => {
@@ -32,12 +37,7 @@ const MyRequests = () => {
       changedFirstTabName,
       changedSecondTabName
     );
-    console.log(data);
-    const filtered = data.filter((d) => d.tab === secondTab);
-
-    setProfiles(
-      firstTab === "받은 요청" ? data.filter((d) => d.tab === secondTab) : data
-    );
+    setProfiles(data.filter((d) => d.tab === secondTab));
   };
 
   const changeTab = (type: string, e: React.MouseEvent<HTMLButtonElement>) => {
@@ -47,8 +47,27 @@ const MyRequests = () => {
       : setSecondTab(eventTarget.innerText);
   };
 
+  const approveRequest = (
+    requestId: string,
+    profileId: string,
+    tab: string
+  ) => {
+    deleteRequest(requestId);
+    addRelationship(profileId, user?.uid, tab);
+    setProfiles((prev) => prev.filter((p) => p.id !== profileId));
+  };
+
+  const rejectRequest = (requestId: string, profileId: string) => {
+    console.log("onReject", requestId, profileId);
+    deleteRequest(requestId);
+    setProfiles((prev) => prev.filter((p) => p.id !== profileId));
+  };
+
   useEffect(() => {
-    user && fetchProfiles();
+    if (!user) return;
+    setLoading(true);
+    fetchProfiles();
+    setLoading(false);
   }, [firstTab, secondTab]);
 
   return (
@@ -83,6 +102,8 @@ const MyRequests = () => {
       <Grid gap="2" w="80%">
         {isArrayEmpty(profiles) ? (
           <Text textAlign="center">요청이 존재하지 않습니다</Text>
+        ) : loading ? (
+          <></>
         ) : (
           profiles.map((profile, idx) => {
             return (
@@ -91,8 +112,10 @@ const MyRequests = () => {
                 profile={profile}
                 user={user}
                 tab={secondTab}
+                isReceived={firstTab === "받은 요청" ? true : false}
+                approveRequest={approveRequest}
+                rejectRequest={rejectRequest}
                 setAlert={setAlert}
-                isOwner={false}
                 setProfiles={setProfiles}
               />
             );

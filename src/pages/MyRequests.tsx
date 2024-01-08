@@ -22,9 +22,11 @@ const MyRequests = () => {
   const [firstTab, setFirstTab] = useState<string>("보낸 요청");
   const [secondTab, setSecondTab] = useState<string>("친구");
   const [alert, setAlert] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const user = useAuthContext();
 
   const fetchProfiles = async () => {
+    console.log("fetchProfiles");
     const changedFirstTabName = changeTabName(firstTab);
     const changedSecondTabName = changeTabName(secondTab);
     const data = await getProfilesFromRequests(
@@ -32,15 +34,13 @@ const MyRequests = () => {
       changedFirstTabName,
       changedSecondTabName
     );
-    console.log(data);
-    const filtered = data.filter((d) => d.tab === secondTab);
-
     setProfiles(
       firstTab === "받은 요청" ? data.filter((d) => d.tab === secondTab) : data
     );
   };
 
   const changeTab = (type: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log("changeTab");
     const eventTarget = e.target as HTMLButtonElement;
     type === "requestType"
       ? setFirstTab(eventTarget.innerText)
@@ -48,7 +48,10 @@ const MyRequests = () => {
   };
 
   useEffect(() => {
-    user && fetchProfiles();
+    if (!user) return;
+    setLoading(true);
+    fetchProfiles();
+    setLoading(false);
   }, [firstTab, secondTab]);
 
   return (
@@ -83,6 +86,8 @@ const MyRequests = () => {
       <Grid gap="2" w="80%">
         {isArrayEmpty(profiles) ? (
           <Text textAlign="center">요청이 존재하지 않습니다</Text>
+        ) : loading ? (
+          <></>
         ) : (
           profiles.map((profile, idx) => {
             return (
@@ -92,7 +97,6 @@ const MyRequests = () => {
                 user={user}
                 tab={secondTab}
                 setAlert={setAlert}
-                isOwner={false}
                 setProfiles={setProfiles}
               />
             );

@@ -256,7 +256,6 @@ export const getNotifications = async (
     setNotiList(
       querySnapshot.docs.map((doc) => {
         const changedTabName = changeTabName(doc.data().tab);
-        console.log(doc.id);
         return { ...doc.data(), id: doc.id, tab: changedTabName } as Noti;
       })
     );

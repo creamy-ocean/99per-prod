@@ -31,7 +31,8 @@ const ProfileCard = ({
   if (!user?.uid) return;
 
   const { id, userId, game, image, style, interest, intro } = profile;
-  const [requested, setRequested] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const msg = tab === "친구" ? "추가" : tab === "파티" ? "참여" : "가입";
 
@@ -42,9 +43,10 @@ const ProfileCard = ({
     }, 5000);
   };
 
-  const checkRequested = async () => {
+  const checkRequestId = async () => {
+    console.log("checkRequestId");
     const result = await getRequestId(user.uid, userId, tab, game);
-    setRequested(result);
+    setRequestId(result);
   };
 
   const onAddRequest = async () => {
@@ -57,7 +59,7 @@ const ProfileCard = ({
         tab,
         game
       );
-      setRequested(requestId);
+      setRequestId(requestId);
       setAlertMsg(`${tab} ${msg} 요청을 보냈습니다`);
     } else {
       setAlertMsg(`${game} 친구 프로필을 먼저 등록해주세요`);
@@ -65,10 +67,10 @@ const ProfileCard = ({
   };
 
   const onCancelRequest = async () => {
-    if (!requested) return;
-    cancelRequest(requested);
+    if (!requestId) return;
+    cancelRequest(requestId);
     setAlertMsg(`${tab} ${msg} 요청이 취소되었습니다`);
-    setRequested(null);
+    setRequestId(null);
     setProfiles &&
       setProfiles((prev) => {
         return prev.filter((p) => {
@@ -83,70 +85,81 @@ const ProfileCard = ({
   };
 
   useEffect(() => {
-    checkRequested();
-  }, []);
+    setLoading(true);
+    checkRequestId();
+    setLoading(false);
+  }, [profile]);
 
   return (
-    <Grid
-      templateColumns="1fr 5fr 0.5fr"
-      border="1px solid #fff"
-      borderRadius="base"
-      p="2"
-      gap="2"
-    >
-      <Flex justify="center" align="center" pos="relative">
-        {image ? (
-          <Img
-            src={image}
-            maxW="4rem"
-            maxH="4rem"
-            borderRadius="full"
-            alt="프로필 목록에 있는 유저의 프로필 사진"
-          />
-        ) : (
-          <Box>'_'</Box>
-        )}
-      </Flex>
-      <Box fontSize="0.9rem" ml="2">
-        {style.map((s: string, idx: number) => {
-          return (
-            <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
-              {s}
-            </Tag>
-          );
-        })}
-        {interest.map((i: string, idx: number) => {
-          return (
-            <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
-              {i}
-            </Tag>
-          );
-        })}
-        <Text mt="0.5">{intro}</Text>
-      </Box>
-      <Flex
-        justify="center"
-        align="center"
-        color="grey"
-        sx={{ i: { cursor: "pointer" } }}
-      >
-        {isOwner ? (
-          <>
-            <Link to="/newProfile" state={{ profile }}>
-              <i
-                className="fa-solid fa-pen-to-square"
-                style={{ marginRight: "1rem" }}
-              ></i>
-            </Link>
-            <i className="fa-solid fa-trash-can" onClick={onDeleteProfile}></i>
-          </>
-        ) : requested ? (
-          <i className="fa-solid fa-check" onClick={onCancelRequest}></i>
-        ) : (
-          <i className="fa-solid fa-plus" onClick={onAddRequest}></i>
-        )}
-      </Flex>
-    </Grid>
+    <>
+      {loading ? (
+        <></>
+      ) : (
+        <Grid
+          templateColumns="1fr 5fr 0.5fr"
+          border="1px solid #fff"
+          borderRadius="base"
+          p="2"
+          gap="2"
+        >
+          <Flex justify="center" align="center" pos="relative">
+            {image ? (
+              <Img
+                src={image}
+                maxW="4rem"
+                maxH="4rem"
+                borderRadius="full"
+                alt="프로필 목록에 있는 유저의 프로필 사진"
+              />
+            ) : (
+              <Box>'_'</Box>
+            )}
+          </Flex>
+          <Box fontSize="0.9rem" ml="2">
+            {style.map((s: string, idx: number) => {
+              return (
+                <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
+                  {s}
+                </Tag>
+              );
+            })}
+            {interest.map((i: string, idx: number) => {
+              return (
+                <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
+                  {i}
+                </Tag>
+              );
+            })}
+            <Text mt="0.5">{intro}</Text>
+          </Box>
+          <Flex
+            justify="center"
+            align="center"
+            color="grey"
+            sx={{ i: { cursor: "pointer" } }}
+          >
+            {isOwner ? (
+              <>
+                <Link to="/newProfile" state={{ profile }}>
+                  <i
+                    className="fa-solid fa-pen-to-square"
+                    style={{ marginRight: "1rem" }}
+                  ></i>
+                </Link>
+                <i
+                  className="fa-solid fa-trash-can"
+                  onClick={onDeleteProfile}
+                ></i>
+              </>
+            ) : requestId ? (
+              <i className="fa-solid fa-check" onClick={onCancelRequest}></i>
+            ) : (
+              <i className="fa-solid fa-plus" onClick={onAddRequest}></i>
+            )}
+          </Flex>
+        </Grid>
+      )}
+    </>
   );
 };
 export default ProfileCard;

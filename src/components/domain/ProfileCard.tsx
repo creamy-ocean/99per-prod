@@ -1,11 +1,11 @@
 import {
   addRequest,
   cancelRequest,
-  checkIfProfileExists,
+  getProfileId,
   getRequestId,
 } from "@/database/firebase";
 import { Profile, UserInterface } from "@/types/types";
-import { Box, Flex, Grid, Img, Tag, Text } from "@chakra-ui/react";
+import { Box, Flex, Grid, Img, Tag, Text, Tooltip } from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -15,6 +15,9 @@ interface ProfileProps {
   tab: string;
   setAlert: Dispatch<SetStateAction<string>>;
   isOwner?: boolean;
+  isReceived?: boolean;
+  approveRequest?: (requestId: string, profileId: string, tab: string) => void;
+  rejectRequest?: (requestId: string, profileId: string) => void;
   deleteProfile?: (id: string) => void;
   setProfiles?: Dispatch<SetStateAction<Profile[]>>;
 }
@@ -25,6 +28,9 @@ const ProfileCard = ({
   tab,
   setAlert,
   isOwner,
+  isReceived,
+  approveRequest,
+  rejectRequest,
   deleteProfile,
   setProfiles,
 }: ProfileProps) => {
@@ -44,16 +50,15 @@ const ProfileCard = ({
   };
 
   const checkRequestId = async () => {
-    console.log("checkRequestId");
     const result = await getRequestId(user.uid, userId, tab, game);
     setRequestId(result);
   };
 
   const onAddRequest = async () => {
-    const isProfileExists = await checkIfProfileExists(user.uid, game);
-    if (isProfileExists) {
+    const profileId = await getProfileId(user.uid, game);
+    if (profileId) {
       const requestId = await addRequest(
-        profile.id,
+        profileId,
         user.uid,
         userId,
         tab,
@@ -84,6 +89,18 @@ const ProfileCard = ({
     setAlertMsg("프로필이 삭제되었습니다");
   };
 
+  const onApproveRequest = async () => {
+    const _requestId = await getRequestId(userId, user.uid, tab, game);
+    _requestId && approveRequest && approveRequest(_requestId, id, tab);
+    setAlertMsg(`${tab} ${msg} 요청을 수락했습니다`);
+  };
+
+  const onRejectRequest = async () => {
+    const _requestId = await getRequestId(userId, user.uid, tab, game);
+    _requestId && rejectRequest && rejectRequest(_requestId, id);
+    setAlertMsg(`${tab} ${msg} 요청을 거절했습니다`);
+  };
+
   useEffect(() => {
     setLoading(true);
     checkRequestId();
@@ -96,7 +113,7 @@ const ProfileCard = ({
         <></>
       ) : (
         <Grid
-          templateColumns="1fr 5fr 0.5fr"
+          templateColumns="1fr 5fr 0.8fr"
           border="1px solid #fff"
           borderRadius="base"
           p="2"
@@ -135,7 +152,7 @@ const ProfileCard = ({
           <Flex
             justify="center"
             align="center"
-            color="grey"
+            color="#999"
             sx={{ i: { cursor: "pointer" } }}
           >
             {isOwner ? (
@@ -151,10 +168,37 @@ const ProfileCard = ({
                   onClick={onDeleteProfile}
                 ></i>
               </>
+            ) : isReceived ? (
+              <Box
+                sx={{
+                  i: {
+                    color: "#7EB0F2",
+                    fontSize: "1.2em",
+                    marginRight: "0.3rem",
+                  },
+                }}
+              >
+                <Tooltip label="요청 수락" bg="#5096F2" placement="top">
+                  <i
+                    className="fa-solid fa-circle-check"
+                    onClick={onApproveRequest}
+                  ></i>
+                </Tooltip>
+                <Tooltip label="요청 거절" bg="#5096F2" placement="top">
+                  <i
+                    className="fa-solid fa-circle-xmark"
+                    onClick={onRejectRequest}
+                  ></i>
+                </Tooltip>
+              </Box>
             ) : requestId ? (
-              <i className="fa-solid fa-check" onClick={onCancelRequest}></i>
+              <i
+                className="fa-solid fa-user-minus"
+                style={{ color: "#7EB0F2" }}
+                onClick={onCancelRequest}
+              ></i>
             ) : (
-              <i className="fa-solid fa-plus" onClick={onAddRequest}></i>
+              <i className="fa-solid fa-user-plus" onClick={onAddRequest}></i>
             )}
           </Flex>
         </Grid>

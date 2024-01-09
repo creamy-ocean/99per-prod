@@ -16,7 +16,13 @@ interface ProfileProps {
   setAlert: Dispatch<SetStateAction<string>>;
   isOwner?: boolean;
   isReceived?: boolean;
-  approveRequest?: (requestId: string, profileId: string, tab: string) => void;
+  isFriend?: boolean;
+  approveRequest?: (
+    requestId: string,
+    profileId: string,
+    friendUserId: string,
+    tab: string
+  ) => void;
   rejectRequest?: (requestId: string, profileId: string) => void;
   deleteProfile?: (id: string) => void;
   setProfiles?: Dispatch<SetStateAction<Profile[]>>;
@@ -29,6 +35,7 @@ const ProfileCard = ({
   setAlert,
   isOwner,
   isReceived,
+  isFriend,
   approveRequest,
   rejectRequest,
   deleteProfile,
@@ -91,7 +98,7 @@ const ProfileCard = ({
 
   const onApproveRequest = async () => {
     const _requestId = await getRequestId(userId, user.uid, tab, game);
-    _requestId && approveRequest && approveRequest(_requestId, id, tab);
+    _requestId && approveRequest && approveRequest(_requestId, id, userId, tab);
     setAlertMsg(`${tab} ${msg} 요청을 수락했습니다`);
   };
 
@@ -112,96 +119,119 @@ const ProfileCard = ({
       {loading ? (
         <></>
       ) : (
-        <Grid
-          templateColumns="1fr 5fr 0.8fr"
-          border="1px solid #fff"
-          borderRadius="base"
-          p="2"
-          gap="2"
-        >
-          <Flex justify="center" align="center" pos="relative">
-            {image ? (
-              <Img
-                src={image}
-                maxW="4rem"
-                maxH="4rem"
-                borderRadius="full"
-                alt="프로필 목록에 있는 유저의 프로필 사진"
-              />
-            ) : (
-              <Box>'_'</Box>
-            )}
-          </Flex>
-          <Box fontSize="0.9rem" ml="2">
-            {style.map((s: string, idx: number) => {
-              return (
-                <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
-                  {s}
-                </Tag>
-              );
-            })}
-            {interest.map((i: string, idx: number) => {
-              return (
-                <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
-                  {i}
-                </Tag>
-              );
-            })}
-            <Text mt="0.5">{intro}</Text>
-          </Box>
-          <Flex
-            justify="center"
-            align="center"
-            color="#999"
-            sx={{ i: { cursor: "pointer" } }}
+        <>
+          <Grid
+            templateColumns="1fr 5fr 0.8fr"
+            border="1px solid #fff"
+            borderRadius="base"
+            p="2"
+            gap="2"
           >
-            {isOwner ? (
-              <>
-                <Link to="/newProfile" state={{ profile }}>
+            <Flex justify="center" align="center" pos="relative">
+              {image ? (
+                <Img
+                  src={image}
+                  maxW="4rem"
+                  maxH="4rem"
+                  borderRadius="full"
+                  alt="프로필 목록에 있는 유저의 프로필 사진"
+                />
+              ) : (
+                <Box>'_'</Box>
+              )}
+            </Flex>
+            <Box fontSize="0.9rem" ml="2">
+              {style.map((s: string, idx: number) => {
+                return (
+                  <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
+                    {s}
+                  </Tag>
+                );
+              })}
+              {interest.map((i: string, idx: number) => {
+                return (
+                  <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
+                    {i}
+                  </Tag>
+                );
+              })}
+              <Text mt="0.5">{intro}</Text>
+            </Box>
+            <Flex
+              justify="center"
+              align="center"
+              color="#999"
+              sx={{ i: { cursor: "pointer" } }}
+            >
+              {isOwner ? (
+                <>
+                  <Link to="/newProfile" state={{ profile }}>
+                    <i
+                      className="fa-solid fa-pen-to-square"
+                      style={{ marginRight: "1rem" }}
+                    ></i>
+                  </Link>
                   <i
-                    className="fa-solid fa-pen-to-square"
-                    style={{ marginRight: "1rem" }}
+                    className="fa-solid fa-trash-can"
+                    onClick={onDeleteProfile}
                   ></i>
-                </Link>
+                </>
+              ) : isFriend ? (
+                <i style={{ color: "#FF8A8D" }} className="fa-solid fa-ban"></i>
+              ) : isReceived ? (
+                <Box
+                  sx={{
+                    i: {
+                      color: "#7EB0F2",
+                      fontSize: "1.2em",
+                      marginRight: "0.3rem",
+                    },
+                  }}
+                >
+                  <Tooltip label="요청 수락" bg="#5096F2" placement="top">
+                    <i
+                      className="fa-solid fa-circle-check"
+                      onClick={onApproveRequest}
+                    ></i>
+                  </Tooltip>
+                  <Tooltip label="요청 거절" bg="#5096F2" placement="top">
+                    <i
+                      className="fa-solid fa-circle-xmark"
+                      onClick={onRejectRequest}
+                    ></i>
+                  </Tooltip>
+                </Box>
+              ) : requestId ? (
                 <i
-                  className="fa-solid fa-trash-can"
-                  onClick={onDeleteProfile}
+                  className="fa-solid fa-user-minus"
+                  style={{ color: "#7EB0F2" }}
+                  onClick={onCancelRequest}
                 ></i>
-              </>
-            ) : isReceived ? (
-              <Box
-                sx={{
-                  i: {
-                    color: "#7EB0F2",
-                    fontSize: "1.2em",
-                    marginRight: "0.3rem",
-                  },
-                }}
-              >
-                <Tooltip label="요청 수락" bg="#5096F2" placement="top">
-                  <i
-                    className="fa-solid fa-circle-check"
-                    onClick={onApproveRequest}
-                  ></i>
-                </Tooltip>
-                <Tooltip label="요청 거절" bg="#5096F2" placement="top">
-                  <i
-                    className="fa-solid fa-circle-xmark"
-                    onClick={onRejectRequest}
-                  ></i>
-                </Tooltip>
-              </Box>
-            ) : requestId ? (
+              ) : (
+                <i className="fa-solid fa-user-plus" onClick={onAddRequest}></i>
+              )}
+            </Flex>
+          </Grid>
+          {isFriend && (
+            <Flex
+              fontSize="0.9rem"
+              backgroundColor="#EDF2F7"
+              p="1"
+              justify="center"
+              align="center"
+              sx={{
+                color: "#555",
+                fontWeight: "bold",
+              }}
+            >
+              {profile.contact}
               <i
-                className="fa-solid fa-user-minus"
-                style={{ color: "#7EB0F2" }}
-                onClick={onCancelRequest}
+                style={{ marginLeft: "0.5rem", cursor: "pointer" }}
+                className="fa-solid fa-copy"
               ></i>
-            ) : (
-              <i className="fa-solid fa-user-plus" onClick={onAddRequest}></i>
-            )}
-          </Flex>
-        </Grid>
+            </Flex>
+          )}
+        </>
       )}
     </>
   );

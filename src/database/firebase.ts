@@ -1,4 +1,4 @@
-import { FormValues, Noti } from "@/types/types";
+import { FormValues, Noti, Profile } from "@/types/types";
 import { config } from "@/utils/config";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import { initializeApp } from "firebase/app";
@@ -391,6 +391,7 @@ const getProfileIdsFromRequests = async (
 export const addRelationship = async (
   profileId: string,
   userId: string | undefined,
+  friendUserId: string,
   tab: string
 ) => {
   const changedTabName = changeTabName(tab);
@@ -398,4 +399,43 @@ export const addRelationship = async (
     profileId,
     createdAt: serverTimestamp(),
   });
+  await addDoc(
+    collection(db, `relationships/${changedTabName}/${friendUserId}`),
+    {
+      profileId,
+      createdAt: serverTimestamp(),
+    }
+  );
+};
+
+export const getProfilesFromRelationships = async (
+  tab: string,
+  colName: string,
+  docName: string
+) => {
+  const profilesQuery = query(
+    collection(db, `${colName}/${tab}/${docName}`),
+    orderBy("createdAt", "desc")
+  );
+  const snapshot = await getDocs(profilesQuery);
+  if (snapshot.empty) {
+    return [];
+  }
+  const profiles = await Promise.all(
+    snapshot.docs.map(async (doc) => {
+      const { profileId } = doc.data();
+      const { createdAt, ...rest } = await getProfileById(profileId, tab);
+      return { id: doc.id, ...rest } as Profile;
+    })
+  );
+  return Object.keys(profiles[0]).length === 1 ? [] : profiles;
+};
+
+const getProfileById = async (profileId: string, tab: string) => {
+  const docSnap = await getDoc(doc(db, `${tab}`, profileId));
+  if (docSnap.exists()) {
+    return docSnap.data();
+  } else {
+    return {};
+  }
 };

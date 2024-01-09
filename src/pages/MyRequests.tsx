@@ -50,10 +50,11 @@ const MyRequests = () => {
   const approveRequest = (
     requestId: string,
     profileId: string,
+    userId: string,
     tab: string
   ) => {
     deleteRequest(requestId);
-    addRelationship(profileId, user?.uid, tab);
+    addRelationship(profileId, user?.uid, userId, tab);
     setProfiles((prev) => prev.filter((p) => p.id !== profileId));
   };
 

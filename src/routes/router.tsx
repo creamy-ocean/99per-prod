@@ -3,6 +3,7 @@ import ErrorPage from "@/pages/ErrorPage";
 import Friends from "@/pages/Friends";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
+import MyFriends from "@/pages/MyFriends";
 import MyProfiles from "@/pages/MyProfiles";
 import MyRequests from "@/pages/MyRequests";
 import NewProfile from "@/pages/NewProfile";
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
       { path: "/newProfile", element: <NewProfile /> },
       { path: "/myProfiles", element: <MyProfiles /> },
       { path: "/myRequests", element: <MyRequests /> },
+      { path: "/myFriends", element: <MyFriends /> },
     ],
   },
 ]);

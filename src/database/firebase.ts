@@ -424,18 +424,45 @@ export const getProfilesFromRelationships = async (
   const profiles = await Promise.all(
     snapshot.docs.map(async (doc) => {
       const { profileId } = doc.data();
-      const { createdAt, ...rest } = await getProfileById(profileId, tab);
-      return { id: doc.id, ...rest } as Profile;
+      const profile = await getProfileById(profileId, tab);
+      if (profile) {
+        return profile as Profile;
+      } else {
+        return {} as Profile;
+      }
     })
   );
-  return Object.keys(profiles[0]).length === 1 ? [] : profiles;
+  return isArrayEmpty(Object.keys(profiles[0])) ? [] : profiles;
 };
 
 const getProfileById = async (profileId: string, tab: string) => {
   const docSnap = await getDoc(doc(db, `${tab}`, profileId));
   if (docSnap.exists()) {
-    return docSnap.data();
+    const { id, createdAt, ...rest } = docSnap.data();
+    return { id: docSnap.id, ...rest };
   } else {
     return {};
   }
+};
+
+export const blockUser = async (
+  tab: string,
+  userId: string,
+  blockedUserProfileId: string,
+  blockedUserId: string
+) => {
+  const userQuery = query(
+    collection(db, `relationships/${tab}/${userId}`),
+    where("profileId", "==", blockedUserProfileId)
+  );
+  const snapshot = await getDocs(userQuery);
+  snapshot.docs.forEach(async (doc) => {
+    await deleteDoc(doc.ref);
+  });
+  await addDoc(collection(db, `blocking/${userId}/userBlocking`), {
+    userId: blockedUserId,
+  });
+  await addDoc(collection(db, `blocking/${blockedUserId}/userBlocked`), {
+    userId,
+  });
 };

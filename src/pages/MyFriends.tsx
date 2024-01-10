@@ -1,5 +1,6 @@
 import { useAuthContext } from "@/context/AuthContext";
 import {
+  blockUser,
   deleteProfile,
   getProfilesFromRelationships,
 } from "@/database/firebase";
@@ -52,11 +53,26 @@ const MyFriends = () => {
     );
   };
 
+  const onBlockUser = async (
+    tab: string,
+    userId: string,
+    blockedUserProfileId: string,
+    blockedUserId: string
+  ) => {
+    await blockUser(
+      changeTabName(tab),
+      userId,
+      blockedUserProfileId,
+      blockedUserId
+    );
+    setProfiles(
+      profiles.filter((profile) => profile.id !== blockedUserProfileId)
+    );
+  };
+
   useEffect(() => {
     fetchProfiles();
   }, [currTab]);
-
-  console.log(profiles);
 
   return (
     <Flex
@@ -95,6 +111,7 @@ const MyFriends = () => {
                 setAlert={setAlert}
                 isFriend={true}
                 deleteProfile={onDeleteProfile}
+                blockUser={onBlockUser}
               />
             );
           })

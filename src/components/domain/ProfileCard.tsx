@@ -7,6 +7,7 @@ import {
 import { Profile, UserInterface } from "@/types/types";
 import { Box, Flex, Grid, Img, Tag, Text, Tooltip } from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Link } from "react-router-dom";
 
 interface ProfileProps {
@@ -25,6 +26,12 @@ interface ProfileProps {
   ) => void;
   rejectRequest?: (requestId: string, profileId: string) => void;
   deleteProfile?: (id: string) => void;
+  blockUser?: (
+    tab: string,
+    userId: string,
+    bannedUserProfileId: string,
+    bannedUserId: string
+  ) => void;
   setProfiles?: Dispatch<SetStateAction<Profile[]>>;
 }
 
@@ -39,6 +46,7 @@ const ProfileCard = ({
   approveRequest,
   rejectRequest,
   deleteProfile,
+  blockUser,
   setProfiles,
 }: ProfileProps) => {
   if (!user?.uid) return;
@@ -106,6 +114,11 @@ const ProfileCard = ({
     const _requestId = await getRequestId(userId, user.uid, tab, game);
     _requestId && rejectRequest && rejectRequest(_requestId, id);
     setAlertMsg(`${tab} ${msg} 요청을 거절했습니다`);
+  };
+
+  const onBanUser = async () => {
+    blockUser && blockUser(tab, user.uid, id, userId);
+    setAlertMsg("해당 유저를 차단했습니다");
   };
 
   useEffect(() => {
@@ -177,7 +190,18 @@ const ProfileCard = ({
                   ></i>
                 </>
               ) : isFriend ? (
-                <i style={{ color: "#FF8A8D" }} className="fa-solid fa-ban"></i>
+                <Tooltip
+                  maxW="11rem"
+                  label="차단하면 해당 유저에게 내가 보이지 않고 나에게 해당 유저가 보이지 않아요"
+                  bg="#FF8A8D"
+                  placement="top"
+                >
+                  <i
+                    style={{ color: "#FF8A8D" }}
+                    className="fa-solid fa-ban"
+                    onClick={onBanUser}
+                  ></i>
+                </Tooltip>
               ) : isReceived ? (
                 <Box
                   sx={{
@@ -225,10 +249,17 @@ const ProfileCard = ({
               }}
             >
               {profile.contact}
-              <i
-                style={{ marginLeft: "0.5rem", cursor: "pointer" }}
-                className="fa-solid fa-copy"
-              ></i>
+              <CopyToClipboard
+                onCopy={() => {
+                  setAlertMsg("연락처를 복사했습니다");
+                }}
+                text={profile.contact}
+              >
+                <i
+                  style={{ marginLeft: "0.5rem", cursor: "pointer" }}
+                  className="fa-solid fa-copy"
+                ></i>
+              </CopyToClipboard>
             </Flex>
           )}
         </>

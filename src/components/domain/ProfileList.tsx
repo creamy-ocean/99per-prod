@@ -1,5 +1,5 @@
 import { useAuthContext } from "@/context/AuthContext";
-import { getProfiles } from "@/database/firebase";
+import { getBlockedUsers, getProfiles } from "@/database/firebase";
 import { Filters, Profile } from "@/types/types";
 import { changeTabName } from "@/utils/functions";
 import {
@@ -22,12 +22,16 @@ const ProfileList = ({ tab }: { tab: string }) => {
     style: [],
   });
   const [alert, setAlert] = useState<string>("");
+  const [blockedUsers, setBlockedUsers] = useState<Array<string>>([]);
   const user = useAuthContext();
+
+  if (!user) return;
 
   const fetchProfiles = async () => {
     const changedTabName = changeTabName(tab);
     const data = await getProfiles(changedTabName);
     setProfiles(data);
+    setBlockedUsers(await getBlockedUsers(user.uid));
   };
 
   useEffect(() => {
@@ -55,8 +59,6 @@ const ProfileList = ({ tab }: { tab: string }) => {
     return true;
   };
 
-  console.log(profiles);
-
   return (
     <Flex
       backgroundColor="#fff"
@@ -79,6 +81,8 @@ const ProfileList = ({ tab }: { tab: string }) => {
         {isFiltersEmpty
           ? profiles.map((profile, idx) => {
               if (profile.userId === user?.uid) {
+                return;
+              } else if (blockedUsers.includes(profile.userId)) {
                 return;
               } else {
                 return (

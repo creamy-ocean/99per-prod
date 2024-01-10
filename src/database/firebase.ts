@@ -154,6 +154,24 @@ export const getProfiles = async (tab: string) => {
   return profiles;
 };
 
+export const getBlockedUsers = async (userId: string) => {
+  const userBlockedQuery = query(
+    collection(db, `blocking/${userId}/userBlocked`)
+  );
+  const blockedUserQuery = query(
+    collection(db, `blocking/${userId}/userBlocking`)
+  );
+  const userBlockedSnapshot = await getDocs(userBlockedQuery);
+  const usersBlocked = userBlockedSnapshot.docs.map((doc) => {
+    return doc.data().userId;
+  });
+  const blockedUserSnapshot = await getDocs(blockedUserQuery);
+  const blockedUsers = blockedUserSnapshot.docs.map((doc) => {
+    return doc.data().userId;
+  });
+  return usersBlocked.concat(blockedUsers);
+};
+
 export const getProfileId = async (userId: string, game: string) => {
   const profileQuery = query(
     collection(db, "friends"),

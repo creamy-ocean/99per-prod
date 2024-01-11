@@ -29,9 +29,9 @@ const ProfileList = ({ tab }: { tab: string }) => {
 
   const fetchProfiles = async () => {
     const changedTabName = changeTabName(tab);
+    setBlockedUsers(await getBlockedUsers(user.uid));
     const data = await getProfiles(changedTabName);
     setProfiles(data);
-    setBlockedUsers(await getBlockedUsers(user.uid));
   };
 
   useEffect(() => {

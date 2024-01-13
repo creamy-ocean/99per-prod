@@ -172,9 +172,13 @@ export const getBlockedUsers = async (userId: string) => {
   return usersBlocked.concat(blockedUsers);
 };
 
-export const getProfileId = async (userId: string, game: string) => {
+export const getProfileId = async (
+  tab: string,
+  userId: string | undefined,
+  game: string
+) => {
   const profileQuery = query(
-    collection(db, "friends"),
+    collection(db, tab),
     where("userId", "==", userId),
     where("game", "==", game)
   );
@@ -407,20 +411,24 @@ const getProfileIdsFromRequests = async (
 };
 
 export const addRelationship = async (
-  profileId: string,
+  pairUserProfileId: string,
   userId: string | undefined,
-  friendUserId: string,
-  tab: string
+  pairUserId: string,
+  tab: string,
+  game: string
 ) => {
   const changedTabName = changeTabName(tab);
   await addDoc(collection(db, `relationships/${changedTabName}/${userId}`), {
-    profileId,
+    type: "recipient",
+    pairProfileId: pairUserProfileId,
     createdAt: serverTimestamp(),
   });
+  const userProfileId = await getProfileId(changedTabName, userId, game);
   await addDoc(
-    collection(db, `relationships/${changedTabName}/${friendUserId}`),
+    collection(db, `relationships/${changedTabName}/${pairUserId}`),
     {
-      profileId,
+      type: "sender",
+      pairProfileId: userProfileId,
       createdAt: serverTimestamp(),
     }
   );
@@ -441,8 +449,11 @@ export const getProfilesFromRelationships = async (
   }
   const profiles = await Promise.all(
     snapshot.docs.map(async (doc) => {
-      const { profileId } = doc.data();
-      const profile = await getProfileById(profileId, tab);
+      const { pairProfileId, type } = doc.data();
+      const profile = await getProfileById(
+        pairProfileId,
+        tab !== "friends" && type === "sender" ? tab : "friends"
+      );
       if (profile) {
         return profile as Profile;
       } else {
@@ -469,12 +480,19 @@ export const blockUser = async (
   blockedUserProfileId: string,
   blockedUserId: string
 ) => {
-  const userQuery = query(
+  const blockingUserQuery = query(
     collection(db, `relationships/${tab}/${userId}`),
-    where("profileId", "==", blockedUserProfileId)
+    where("pairProfileId", "==", blockedUserProfileId)
   );
-  const snapshot = await getDocs(userQuery);
-  snapshot.docs.forEach(async (doc) => {
+  const blockingUserSnapshot = await getDocs(blockingUserQuery);
+  blockingUserSnapshot.docs.forEach(async (doc) => {
+    await deleteDoc(doc.ref);
+  });
+  const blockedUserQuery = query(
+    collection(db, `relationships/${tab}/${blockedUserId}`)
+  );
+  const blockedUserSnapshot = await getDocs(blockedUserQuery);
+  blockedUserSnapshot.docs.forEach(async (doc) => {
     await deleteDoc(doc.ref);
   });
   await addDoc(collection(db, `blocking/${userId}/userBlocking`), {

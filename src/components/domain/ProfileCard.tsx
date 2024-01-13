@@ -22,7 +22,8 @@ interface ProfileProps {
     requestId: string,
     profileId: string,
     friendUserId: string,
-    tab: string
+    tab: string,
+    game: string
   ) => void;
   rejectRequest?: (requestId: string, profileId: string) => void;
   deleteProfile?: (id: string) => void;
@@ -70,7 +71,7 @@ const ProfileCard = ({
   };
 
   const onAddRequest = async () => {
-    const profileId = await getProfileId(user.uid, game);
+    const profileId = await getProfileId("friends", user.uid, game);
     if (profileId) {
       const requestId = await addRequest(
         profileId,
@@ -106,7 +107,9 @@ const ProfileCard = ({
 
   const onApproveRequest = async () => {
     const _requestId = await getRequestId(userId, user.uid, tab, game);
-    _requestId && approveRequest && approveRequest(_requestId, id, userId, tab);
+    _requestId &&
+      approveRequest &&
+      approveRequest(_requestId, id, userId, tab, game);
     setAlertMsg(`${tab} ${msg} 요청을 수락했습니다`);
   };
 

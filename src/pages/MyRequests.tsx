@@ -51,10 +51,11 @@ const MyRequests = () => {
     requestId: string,
     profileId: string,
     userId: string,
-    tab: string
+    tab: string,
+    game: string
   ) => {
     deleteRequest(requestId);
-    addRelationship(profileId, user?.uid, userId, tab);
+    addRelationship(profileId, user?.uid, userId, tab, game);
     setProfiles((prev) => prev.filter((p) => p.id !== profileId));
   };
 

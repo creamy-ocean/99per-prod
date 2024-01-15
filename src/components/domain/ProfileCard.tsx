@@ -163,14 +163,14 @@ const ProfileCard = ({
               </Box>
               {style.map((s: string, idx: number) => {
                 return (
-                  <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
+                  <Tag key={idx} colorScheme="blue" mr="1" mt="1">
                     {s}
                   </Tag>
                 );
               })}
               {interest.map((i: string, idx: number) => {
                 return (
-                  <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
+                  <Tag key={idx} colorScheme="blue" mr="1" mt="1">
                     {i}
                   </Tag>
                 );

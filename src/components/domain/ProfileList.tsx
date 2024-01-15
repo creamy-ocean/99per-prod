@@ -65,6 +65,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
       w="80%"
       maxW="40rem"
       p="2"
+      pb="6"
       mt="6"
       mb="6"
       direction="column"

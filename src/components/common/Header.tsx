@@ -198,11 +198,14 @@ const Header = () => {
                 )}
               </MenuButton>
               <MenuList>
+                <Link to="/myRequests">
+                  <MenuItem>내 요청</MenuItem>
+                </Link>
                 <Link to="/myProfiles">
                   <MenuItem>내 프로필</MenuItem>
                 </Link>
-                <Link to="/myRequests">
-                  <MenuItem>내 요청</MenuItem>
+                <Link to="/myFriends">
+                  <MenuItem>내 친구/파티/길드</MenuItem>
                 </Link>
                 <MenuDivider />
                 <MenuItem onClick={logout}>로그아웃</MenuItem>

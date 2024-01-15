@@ -1,4 +1,4 @@
-import { FormValues, Noti } from "@/types/types";
+import { FormValues, Noti, Profile } from "@/types/types";
 import { config } from "@/utils/config";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import { initializeApp } from "firebase/app";
@@ -154,9 +154,31 @@ export const getProfiles = async (tab: string) => {
   return profiles;
 };
 
-export const getProfileId = async (userId: string, game: string) => {
+export const getBlockedUsers = async (userId: string) => {
+  const userBlockedQuery = query(
+    collection(db, `blocking/${userId}/userBlocked`)
+  );
+  const blockedUserQuery = query(
+    collection(db, `blocking/${userId}/userBlocking`)
+  );
+  const userBlockedSnapshot = await getDocs(userBlockedQuery);
+  const usersBlocked = userBlockedSnapshot.docs.map((doc) => {
+    return doc.data().userId;
+  });
+  const blockedUserSnapshot = await getDocs(blockedUserQuery);
+  const blockedUsers = blockedUserSnapshot.docs.map((doc) => {
+    return doc.data().userId;
+  });
+  return usersBlocked.concat(blockedUsers);
+};
+
+export const getProfileId = async (
+  tab: string,
+  userId: string | undefined,
+  game: string
+) => {
   const profileQuery = query(
-    collection(db, "friends"),
+    collection(db, tab),
     where("userId", "==", userId),
     where("game", "==", game)
   );
@@ -389,13 +411,94 @@ const getProfileIdsFromRequests = async (
 };
 
 export const addRelationship = async (
-  profileId: string,
+  pairUserProfileId: string,
   userId: string | undefined,
-  tab: string
+  pairUserId: string,
+  tab: string,
+  game: string
 ) => {
   const changedTabName = changeTabName(tab);
   await addDoc(collection(db, `relationships/${changedTabName}/${userId}`), {
-    profileId,
+    type: "recipient",
+    pairProfileId: pairUserProfileId,
     createdAt: serverTimestamp(),
+  });
+  const userProfileId = await getProfileId(changedTabName, userId, game);
+  await addDoc(
+    collection(db, `relationships/${changedTabName}/${pairUserId}`),
+    {
+      type: "sender",
+      pairProfileId: userProfileId,
+      createdAt: serverTimestamp(),
+    }
+  );
+};
+
+export const getProfilesFromRelationships = async (
+  tab: string,
+  colName: string,
+  docName: string
+) => {
+  const profilesQuery = query(
+    collection(db, `${colName}/${tab}/${docName}`),
+    orderBy("createdAt", "desc")
+  );
+  const snapshot = await getDocs(profilesQuery);
+  if (snapshot.empty) {
+    return [];
+  }
+  const profiles = await Promise.all(
+    snapshot.docs.map(async (doc) => {
+      const { pairProfileId, type } = doc.data();
+      const profile = await getProfileById(
+        pairProfileId,
+        tab !== "friends" && type === "sender" ? tab : "friends"
+      );
+      if (profile) {
+        return profile as Profile;
+      } else {
+        return {} as Profile;
+      }
+    })
+  );
+  return isArrayEmpty(Object.keys(profiles[0])) ? [] : profiles;
+};
+
+const getProfileById = async (profileId: string, tab: string) => {
+  const docSnap = await getDoc(doc(db, `${tab}`, profileId));
+  if (docSnap.exists()) {
+    const { id, createdAt, ...rest } = docSnap.data();
+    return { id: docSnap.id, ...rest };
+  } else {
+    return {};
+  }
+};
+
+export const blockUser = async (
+  tab: string,
+  userId: string,
+  blockedUserProfileId: string,
+  blockedUserId: string
+) => {
+  const blockingUserQuery = query(
+    collection(db, `relationships/${tab}/${userId}`),
+    where("pairProfileId", "==", blockedUserProfileId)
+  );
+  const blockingUserSnapshot = await getDocs(blockingUserQuery);
+  blockingUserSnapshot.docs.forEach(async (doc) => {
+    await deleteDoc(doc.ref);
+  });
+  const blockedUserQuery = query(
+    collection(db, `relationships/${tab}/${blockedUserId}`)
+  );
+  const blockedUserSnapshot = await getDocs(blockedUserQuery);
+  blockedUserSnapshot.docs.forEach(async (doc) => {
+    await deleteDoc(doc.ref);
+  });
+  await addDoc(collection(db, `blocking/${userId}/userBlocking`), {
+    userId: blockedUserId,
+  });
+  await addDoc(collection(db, `blocking/${blockedUserId}/userBlocked`), {
+    userId,
   });
 };

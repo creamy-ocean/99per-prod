@@ -157,6 +157,9 @@ const ProfileCard = ({
               )}
             </Flex>
             <Box fontSize="0.9rem" ml="2">
+              <Box>
+                <Tag>{game}</Tag>
+              </Box>
               {style.map((s: string, idx: number) => {
                 return (
                   <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">

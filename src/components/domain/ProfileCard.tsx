@@ -149,6 +149,7 @@ const ProfileCard = ({
                   src={image}
                   maxW="4rem"
                   maxH="4rem"
+                  h="100%"
                   borderRadius="full"
                   alt="프로필 목록에 있는 유저의 프로필 사진"
                 />

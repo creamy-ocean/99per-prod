@@ -97,13 +97,14 @@ const ProfileList = ({ tab }: { tab: string }) => {
                 );
               }
             })
-          : profiles.map((profile) => {
+          : profiles.map((profile, idx) => {
               const isProfileFiltered = checkIfProfileMatchesFilters(profile);
               if (profile.userId === user?.uid) {
                 return;
               } else if (isProfileFiltered) {
                 return (
                   <ProfileCard
+                    key={idx}
                     profile={profile}
                     user={user}
                     tab={tab}

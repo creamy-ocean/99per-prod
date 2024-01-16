@@ -464,7 +464,7 @@ export const getProfilesFromRelationships = async (
   return isArrayEmpty(Object.keys(profiles[0])) ? [] : profiles;
 };
 
-const getProfileById = async (profileId: string, tab: string) => {
+export const getProfileById = async (profileId: string, tab: string) => {
   const docSnap = await getDoc(doc(db, `${tab}`, profileId));
   if (docSnap.exists()) {
     const { id, createdAt, ...rest } = docSnap.data();

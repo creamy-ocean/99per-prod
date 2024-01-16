@@ -82,6 +82,7 @@ const MyFriends = () => {
       p="2"
       mt="6"
       mb="6"
+      pb="6"
       direction="column"
       align="center"
       borderRadius="xl"

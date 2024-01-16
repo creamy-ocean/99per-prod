@@ -149,6 +149,7 @@ const ProfileCard = ({
                   src={image}
                   maxW="4rem"
                   maxH="4rem"
+                  h="100%"
                   borderRadius="full"
                   alt="프로필 목록에 있는 유저의 프로필 사진"
                 />
@@ -157,16 +158,19 @@ const ProfileCard = ({
               )}
             </Flex>
             <Box fontSize="0.9rem" ml="2">
+              <Box>
+                <Tag bgColor="#E6F2FD">{game}</Tag>
+              </Box>
               {style.map((s: string, idx: number) => {
                 return (
-                  <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
+                  <Tag key={idx} colorScheme="blue" mr="1" mt="1">
                     {s}
                   </Tag>
                 );
               })}
               {interest.map((i: string, idx: number) => {
                 return (
-                  <Tag key={idx} colorScheme="blue" mr="1" mt="0.5">
+                  <Tag key={idx} colorScheme="blue" mr="1" mt="1">
                     {i}
                   </Tag>
                 );

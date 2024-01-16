@@ -4,6 +4,7 @@ import {
   getGames,
   getGenres,
   getInterests,
+  getProfileById,
   getStyles,
   updateProfile,
 } from "@/database/firebase";
@@ -99,6 +100,8 @@ const formSchema = object()
 const NewProfile = () => {
   const user = useAuthContext();
   const profile = useLocation().state?.profile;
+
+  if (!user) return;
 
   const [loading, setLoading] = useState<boolean>(true);
   const [currTab, setCurrTab] = useState<string>("친구");
@@ -201,8 +204,13 @@ const NewProfile = () => {
         await updateProfile(user?.uid, profile.id, profile.tab, formValues);
         setAlertMsg("프로필이 수정되었습니다");
       } else {
-        await addProfile(currTab, user?.uid, formValues);
-        setAlertMsg("프로필이 생성되었습니다");
+        const profile = await getProfileById(user?.uid, formValues.game);
+        if (profile) {
+          setAlertMsg(`${formValues.game} 프로필이 이미 존재합니다`);
+        } else {
+          await addProfile(currTab, user?.uid, formValues);
+          setAlertMsg("프로필이 생성되었습니다");
+        }
       }
     } catch (e: any) {
       setAlertMsg(e.message);

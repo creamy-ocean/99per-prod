@@ -1,7 +1,7 @@
 import { useAuthContext } from "@/context/AuthContext";
 import { getBlockedUsers, getProfiles } from "@/database/firebase";
 import { Filters, Profile } from "@/types/types";
-import { changeTabName } from "@/utils/functions";
+import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import {
   Alert,
   AlertIcon,
@@ -9,6 +9,7 @@ import {
   Flex,
   Grid,
   Heading,
+  Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
@@ -21,6 +22,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
     interest: [],
     style: [],
   });
+  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
   const [alert, setAlert] = useState<string>("");
   const [blockedUsers, setBlockedUsers] = useState<Array<string>>([]);
   const user = useAuthContext();
@@ -59,6 +61,10 @@ const ProfileList = ({ tab }: { tab: string }) => {
     return true;
   };
 
+  useEffect(() => {
+    setFilteredProfiles(profiles.filter(checkIfProfileMatchesFilters));
+  }, [filters]);
+
   return (
     <Flex
       backgroundColor="#fff"
@@ -79,8 +85,11 @@ const ProfileList = ({ tab }: { tab: string }) => {
       <ProfileFilter tab={tab} filters={filters} setFilters={setFilters} />
       <Divider w="80%" mt="4" mb="8" />
       <Grid gap="2" w="80%">
-        {isFiltersEmpty
-          ? profiles.map((profile, idx) => {
+        {isFiltersEmpty ? (
+          isArrayEmpty(profiles) ? (
+            <Text textAlign="center">프로필이 없습니다</Text>
+          ) : (
+            profiles.map((profile, idx) => {
               if (profile.userId === user?.uid) {
                 return;
               } else if (blockedUsers.includes(profile.userId)) {
@@ -97,24 +106,26 @@ const ProfileList = ({ tab }: { tab: string }) => {
                 );
               }
             })
-          : profiles.map((profile, idx) => {
-              const isProfileFiltered = checkIfProfileMatchesFilters(profile);
-              if (profile.userId === user?.uid) {
-                return;
-              } else if (isProfileFiltered) {
-                return (
-                  <ProfileCard
-                    key={idx}
-                    profile={profile}
-                    user={user}
-                    tab={tab}
-                    setAlert={setAlert}
-                  />
-                );
-              } else {
-                return;
-              }
-            })}
+          )
+        ) : isArrayEmpty(filteredProfiles) ? (
+          <Text textAlign="center">해당하는 프로필이 없습니다</Text>
+        ) : (
+          filteredProfiles.map((profile, idx) => {
+            if (profile.userId === user?.uid) {
+              return;
+            } else {
+              return (
+                <ProfileCard
+                  key={idx}
+                  profile={profile}
+                  user={user}
+                  tab={tab}
+                  setAlert={setAlert}
+                />
+              );
+            }
+          })
+        )}
       </Grid>
       {alert && (
         <Alert

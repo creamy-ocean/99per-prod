@@ -159,7 +159,7 @@ const ProfileCard = ({
             </Flex>
             <Box fontSize="0.9rem" ml="2">
               <Box>
-                <Tag>{game}</Tag>
+                <Tag bgColor="#E6F2FD">{game}</Tag>
               </Box>
               {style.map((s: string, idx: number) => {
                 return (

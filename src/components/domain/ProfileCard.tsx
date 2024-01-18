@@ -26,7 +26,7 @@ interface ProfileProps {
     game: string
   ) => void;
   rejectRequest?: (requestId: string, profileId: string) => void;
-  deleteProfile?: (id: string) => void;
+  deleteProfile?: (id: string, game: string) => void;
   blockUser?: (
     tab: string,
     userId: string,
@@ -101,7 +101,7 @@ const ProfileCard = ({
   };
 
   const onDeleteProfile = () => {
-    deleteProfile && deleteProfile(id);
+    deleteProfile && deleteProfile(id, game);
     setAlertMsg("프로필이 삭제되었습니다");
   };
 
@@ -129,6 +129,8 @@ const ProfileCard = ({
     checkRequestId();
     setLoading(false);
   }, [profile]);
+
+  console.log(profile);
 
   return (
     <>

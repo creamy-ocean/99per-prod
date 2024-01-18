@@ -62,6 +62,9 @@ export const login = (platform: string) => {
       getUserState(user.uid).then((userState) => {
         !userState && addUserState(user.uid, "joined");
       });
+      // getUsersFriends(user.uid).then((friends) => {
+      //   !friends && updateUsersFriends(user.uid, []);
+      // });
     })
     .catch(console.error);
 };
@@ -92,6 +95,25 @@ export const getUserState = async (userId: string) => {
     return null;
   }
 };
+
+// const getUsersFriends = async (userId: string) => {
+//   const docSnap = await getDoc(doc(db, "users", userId));
+//   if (docSnap.exists()) {
+//     const usersFriends = docSnap.data().friends;
+//     return usersFriends;
+//   } else {
+//     return null;
+//   }
+// };
+
+// const updateUsersFriends = async (
+//   userId: string | undefined,
+//   friendsArray: Array<string> | FieldValue
+// ) => {
+//   await updateDoc(doc(db, `users/${userId}`), {
+//     friends: friendsArray,
+//   });
+// };
 
 export const addProfile = async (
   tab: string,
@@ -322,36 +344,103 @@ export const updateProfile = async (
 export const deleteProfile = async (
   id: string,
   tab: string,
+  game: string,
   userId: string | undefined
 ) => {
   console.log(userId);
   if (!userId) return;
   const changedTabName = changeTabName(tab);
   await deleteDoc(doc(db, changedTabName, id));
-  await deleteRequest("recipientUserId", userId);
-  await deleteRequest("senderUserId", userId);
+  await deleteRequest(null, "recipientUserId", userId, changedTabName, game);
+  await deleteRequest(null, "senderUserId", userId, changedTabName, game);
+
+  await deleteRelationship(id, changedTabName, userId, game);
 };
 
 export const deleteRequest = async (
-  requestId?: string,
+  requestId: string | null,
   fieldName?: string,
-  userId?: string
+  userId?: string,
+  tab?: string,
+  game?: string
 ) => {
   console.log("deleteRequest");
   if (requestId) {
     deleteDoc(doc(db, `requests/${requestId}`));
   } else if (fieldName) {
+    const constrainsts = [];
+    if (tab !== "friends")
+      constrainsts.push(
+        where("tab", "==", tab),
+        where("recipientUserId", "==", userId)
+      );
     const requestQuery = query(
       collection(db, "requests"),
-      where(fieldName, "==", userId)
+      where(fieldName, "==", userId),
+      where("game", "==", game),
+      ...constrainsts
     );
     const snapshot = await getDocs(requestQuery);
     if (snapshot.empty) {
       return;
     } else {
-      return await deleteDoc(doc(db, "requests", snapshot.docs[0].id));
+      snapshot.docs.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
     }
   }
+};
+
+const deleteRelationship = async (
+  profileId: string,
+  tab: string,
+  userId: string,
+  game: string
+) => {
+  const ownerQuery = query(
+    collection(db, `relationships/${tab}/${userId}`),
+    where("game", "==", game)
+  );
+  const ownerSnapshot = await getDocs(ownerQuery);
+  // 해당 유저가 친구 요청하거나 요청 받은 모든 유저의 관계 삭제
+  ownerSnapshot.docs.forEach(async (doc) => {
+    const pairUserId = doc.data().pairUserId;
+    // 친구 프로필을 삭제하는 경우 친구, 파티, 길드 관계 모두 삭제
+    if (tab === "friends") {
+      const friendsPairQuery = query(
+        collection(db, `relationships/${tab}/${pairUserId}`),
+        where("pairProfileId", "==", profileId),
+        where("game", "==", game)
+      );
+      const friendsPairSnapshot = await getDocs(friendsPairQuery);
+      deleteDoc(friendsPairSnapshot.docs[0].ref);
+      const partiesPairQuery = query(
+        collection(db, `relationships/parties/${pairUserId}`),
+        where("pairProfileId", "==", profileId),
+        where("game", "==", game)
+      );
+      const partiesPairSnapshot = await getDocs(partiesPairQuery);
+      deleteDoc(partiesPairSnapshot.docs[0].ref);
+      const guildsPairQuery = query(
+        collection(db, `relationships/guilds/${pairUserId}`),
+        where("pairProfileId", "==", profileId),
+        where("game", "==", game)
+      );
+      const guildsPairSnapshot = await getDocs(guildsPairQuery);
+      deleteDoc(guildsPairSnapshot.docs[0].ref);
+    } else {
+      const pairQuery = query(
+        collection(db, `relationships/${tab}/${pairUserId}`),
+        where("pairProfileId", "==", profileId),
+        where("game", "==", game)
+      );
+      const pairSnapshot = await getDocs(pairQuery);
+      deleteDoc(pairSnapshot.docs[0].ref);
+    }
+  });
+  ownerSnapshot.docs.forEach(async (doc) => {
+    await deleteDoc(doc.ref);
+  });
 };
 
 export const getProfilesFromRequests = async (
@@ -421,7 +510,9 @@ export const addRelationship = async (
   await addDoc(collection(db, `relationships/${changedTabName}/${userId}`), {
     type: "recipient",
     pairProfileId: pairUserProfileId,
+    pairUserId: pairUserId,
     createdAt: serverTimestamp(),
+    game,
   });
   const userProfileId = await getProfileId(changedTabName, userId, game);
   await addDoc(
@@ -429,9 +520,13 @@ export const addRelationship = async (
     {
       type: "sender",
       pairProfileId: userProfileId,
+      pairUserId: userId,
       createdAt: serverTimestamp(),
+      game,
     }
   );
+  // updateUsersFriends(userId, arrayUnion(pairUserId));
+  // updateUsersFriends(pairUserId, arrayUnion(userId));
 };
 
 export const getProfilesFromRelationships = async (
@@ -464,13 +559,32 @@ export const getProfilesFromRelationships = async (
   return isArrayEmpty(Object.keys(profiles[0])) ? [] : profiles;
 };
 
-export const getProfileById = async (profileId: string, tab: string) => {
+const getProfileById = async (profileId: string, tab: string) => {
   const docSnap = await getDoc(doc(db, `${tab}`, profileId));
   if (docSnap.exists()) {
     const { id, createdAt, ...rest } = docSnap.data();
     return { id: docSnap.id, ...rest };
   } else {
     return {};
+  }
+};
+
+export const checkIfProfileExists = async (
+  tab: string,
+  userId: string,
+  game: string
+) => {
+  const changedTabName = changeTabName(tab);
+  const userQuery = query(
+    collection(db, `${changedTabName}`),
+    where("userId", "==", userId),
+    where("game", "==", game)
+  );
+  const snapshot = await getDocs(userQuery);
+  if (snapshot.empty) {
+    return false;
+  } else {
+    return true;
   }
 };
 

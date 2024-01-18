@@ -1,10 +1,10 @@
 import { useAuthContext } from "@/context/AuthContext";
 import {
   addProfile,
+  checkIfProfileExists,
   getGames,
   getGenres,
   getInterests,
-  getProfileById,
   getStyles,
   updateProfile,
 } from "@/database/firebase";
@@ -204,8 +204,12 @@ const NewProfile = () => {
         await updateProfile(user?.uid, profile.id, profile.tab, formValues);
         setAlertMsg("프로필이 수정되었습니다");
       } else {
-        const profile = await getProfileById(user?.uid, formValues.game);
-        if (profile) {
+        const profileExists = await checkIfProfileExists(
+          currTab,
+          user.uid,
+          formValues.game
+        );
+        if (profileExists) {
           setAlertMsg(`${formValues.game} 프로필이 이미 존재합니다`);
         } else {
           await addProfile(currTab, user?.uid, formValues);

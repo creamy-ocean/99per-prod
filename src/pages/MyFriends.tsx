@@ -44,8 +44,8 @@ const MyFriends = () => {
     setCurrTab(eventTarget.innerText);
   };
 
-  const onDeleteProfile = (profileId: string) => {
-    deleteProfile(profileId, currTab, user?.uid);
+  const onDeleteProfile = (profileId: string, game: string) => {
+    deleteProfile(profileId, currTab, game, user?.uid);
     setProfiles(
       profiles.filter((profile) => {
         return profile.id !== profileId;

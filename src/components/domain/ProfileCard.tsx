@@ -71,10 +71,11 @@ const ProfileCard = ({
   };
 
   const onAddRequest = async () => {
-    const profileId = await getProfileId("friends", user.uid, game);
-    if (profileId) {
+    const senderUserProfileId = await getProfileId("friends", user.uid, game);
+    if (senderUserProfileId) {
       const requestId = await addRequest(
-        profileId,
+        id,
+        senderUserProfileId,
         user.uid,
         userId,
         tab,

@@ -243,7 +243,8 @@ export const getInterests = async (tab: string) => {
 };
 
 export const addRequest = async (
-  profileId: string,
+  recipientUserProfileId: string,
+  senderUserProfileId: string,
   senderUserId: string,
   recipientUserId: string,
   tab: string,
@@ -251,7 +252,8 @@ export const addRequest = async (
 ) => {
   const changedTabName = changeTabName(tab);
   const doc = await addDoc(collection(db, "requests"), {
-    profileId,
+    recipientUserProfileId,
+    senderUserProfileId,
     senderUserId,
     recipientUserId,
     tab: changedTabName,
@@ -448,13 +450,21 @@ export const getProfilesFromRequests = async (
   type: string,
   tab: string
 ) => {
-  const profileIds = await getProfileIdsFromRequests(userId, type, tab);
-  if (isArrayEmpty(profileIds)) {
+  const { senderUserProfileIds, recipientUserProfileIds } =
+    await getProfileIdsFromRequests(userId, type, tab);
+  if (
+    isArrayEmpty(senderUserProfileIds) ||
+    isArrayEmpty(recipientUserProfileIds)
+  ) {
     return [];
   }
   const profilesQuery = query(
     collection(db, type === "received" ? "friends" : tab),
-    where(documentId(), "in", profileIds)
+    where(
+      documentId(),
+      "in",
+      type === "received" ? senderUserProfileIds : recipientUserProfileIds
+    )
   );
   const snapshot = await getDocs(profilesQuery);
   const profiles = snapshot.docs.map((doc) => {
@@ -492,11 +502,15 @@ const getProfileIdsFromRequests = async (
   );
 
   const snapshot = await getDocs(requestsQuery);
-  const profileIds = snapshot.docs.map((doc) => {
-    const { profileId } = doc.data();
-    return profileId;
+  const recipientUserProfileIds = snapshot.docs.map((doc) => {
+    const { recipientUserProfileId } = doc.data();
+    return recipientUserProfileId;
   });
-  return profileIds;
+  const senderUserProfileIds = snapshot.docs.map((doc) => {
+    const { senderUserProfileId } = doc.data();
+    return senderUserProfileId;
+  });
+  return { recipientUserProfileIds, senderUserProfileIds };
 };
 
 export const addRelationship = async (

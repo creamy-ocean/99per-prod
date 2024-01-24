@@ -5,7 +5,24 @@ import {
   getRequestId,
 } from "@/database/firebase";
 import { Profile, UserInterface } from "@/types/types";
-import { Box, Flex, Grid, Img, Tag, Text, Tooltip } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  Img,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Tag,
+  Text,
+  Tooltip,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Link } from "react-router-dom";
@@ -58,6 +75,8 @@ const ProfileCard = ({
 
   const msg = tab === "친구" ? "추가" : tab === "파티" ? "참여" : "가입";
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const setAlertMsg = (alertMsg: string) => {
     setAlert(alertMsg);
     setTimeout(() => {
@@ -104,6 +123,7 @@ const ProfileCard = ({
   const onDeleteProfile = () => {
     deleteProfile && deleteProfile(id, game);
     setAlertMsg("프로필이 삭제되었습니다");
+    onClose();
   };
 
   const onApproveRequest = async () => {
@@ -194,10 +214,38 @@ const ProfileCard = ({
                       style={{ marginRight: "1rem" }}
                     ></i>
                   </Link>
-                  <i
-                    className="fa-solid fa-trash-can"
-                    onClick={onDeleteProfile}
-                  ></i>
+                  <i className="fa-solid fa-trash-can" onClick={onOpen}></i>
+                  <Modal
+                    closeOnOverlayClick={false}
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    isCentered
+                  >
+                    <ModalOverlay />
+                    <ModalContent>
+                      <ModalHeader>프로필을 삭제하시겠습니까?</ModalHeader>
+                      <ModalCloseButton />
+                      <ModalBody pb={6}>
+                        {`프로필 삭제 시 해당 프로필로 요청한/요청받은 친구, 파티, 길드
+                        신청이 모두 취소${
+                          tab === "친구"
+                            ? `되며, 해당 프로필과 관련된 친구, 파티,
+                          길드가 모두 삭제됩니다`
+                            : "됩니다"
+                        }`}
+                      </ModalBody>
+                      <ModalFooter>
+                        <Button
+                          colorScheme="red"
+                          mr={3}
+                          onClick={onDeleteProfile}
+                        >
+                          삭제
+                        </Button>
+                        <Button onClick={onClose}>취소</Button>
+                      </ModalFooter>
+                    </ModalContent>
+                  </Modal>
                 </>
               ) : isFriend ? (
                 <Tooltip

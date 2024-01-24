@@ -1,10 +1,10 @@
 import { useAuthContext } from "@/context/AuthContext";
 import {
   addProfile,
+  checkIfProfileExists,
   getGames,
   getGenres,
   getInterests,
-  getProfileById,
   getStyles,
   updateProfile,
 } from "@/database/firebase";
@@ -204,13 +204,20 @@ const NewProfile = () => {
         await updateProfile(user?.uid, profile.id, profile.tab, formValues);
         setAlertMsg("프로필이 수정되었습니다");
       } else {
-        const profile = await getProfileById(user?.uid, formValues.game);
-        if (profile) {
-          setAlertMsg(`${formValues.game} 프로필이 이미 존재합니다`);
-        } else {
-          await addProfile(currTab, user?.uid, formValues);
-          setAlertMsg("프로필이 생성되었습니다");
+        // 친구 프로필의 경우 같은 게임의 프로필이 이미 존재하면 프로필 생성 불가
+        if (currTab === "친구") {
+          const profileExists = await checkIfProfileExists(
+            currTab,
+            user.uid,
+            formValues.game
+          );
+          if (profileExists) {
+            setAlertMsg(`${formValues.game} 친구 프로필이 이미 존재합니다`);
+            return;
+          }
         }
+        await addProfile(currTab, user?.uid, formValues);
+        setAlertMsg("프로필이 생성되었습니다");
       }
     } catch (e: any) {
       setAlertMsg(e.message);

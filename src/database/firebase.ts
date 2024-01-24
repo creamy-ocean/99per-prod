@@ -583,6 +583,17 @@ const getProfileById = async (profileId: string, tab: string) => {
   }
 };
 
+export const getRelativeProfileIds = async (tab: string, userId: string) => {
+  const profilesQuery = query(collection(db, `relationships/${tab}/${userId}`));
+  const snapshot = await getDocs(profilesQuery);
+  if (snapshot.empty) {
+    return [];
+  } else {
+    const profileIds = snapshot.docs.map((doc) => doc.data().pairProfileId);
+    return profileIds;
+  }
+};
+
 export const checkIfProfileExists = async (
   tab: string,
   userId: string,

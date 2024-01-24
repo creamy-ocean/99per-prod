@@ -1,5 +1,9 @@
 import { useAuthContext } from "@/context/AuthContext";
-import { getBlockedUsers, getProfiles } from "@/database/firebase";
+import {
+  getBlockedUsers,
+  getProfiles,
+  getRelativeProfileIds,
+} from "@/database/firebase";
 import { Filters, Profile } from "@/types/types";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import {
@@ -25,19 +29,25 @@ const ProfileList = ({ tab }: { tab: string }) => {
   const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
   const [alert, setAlert] = useState<string>("");
   const [blockedUsers, setBlockedUsers] = useState<Array<string>>([]);
+  const [relativeProfileIds, setRelativeProfileIds] = useState<Array<string>>(
+    []
+  );
   const user = useAuthContext();
 
   if (!user) return;
 
-  const fetchProfiles = async () => {
+  const preset = async () => {
     const changedTabName = changeTabName(tab);
     setBlockedUsers(await getBlockedUsers(user.uid));
+    setRelativeProfileIds(
+      await getRelativeProfileIds(changedTabName, user.uid)
+    );
     const data = await getProfiles(changedTabName);
     setProfiles(data);
   };
 
   useEffect(() => {
-    fetchProfiles();
+    preset();
   }, []);
 
   const checkFilters = () => {
@@ -101,6 +111,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
                     profile={profile}
                     user={user}
                     tab={tab}
+                    isRelative={relativeProfileIds.includes(profile.id)}
                     setAlert={setAlert}
                   />
                 );

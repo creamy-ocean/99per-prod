@@ -19,6 +19,7 @@
     "@fontsource/roboto": "^5.0.8",
     "@hookform/resolvers": "^3.3.2",
     "@types/react-copy-to-clipboard": "^5.0.7",
+    "browser-image-compression": "^2.0.2",
     "firebase": "^10.5.2",
     "framer-motion": "^10.16.4",
     "react": "^18.2.0",

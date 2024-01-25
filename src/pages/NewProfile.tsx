@@ -34,6 +34,7 @@ import {
   VisuallyHiddenInput,
 } from "@chakra-ui/react";
 import { yupResolver } from "@hookform/resolvers/yup";
+import imageCompression from "browser-image-compression";
 import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useLocation } from "react-router-dom";
@@ -67,12 +68,12 @@ const formSchema = object()
       .compact()
       .min(1, "하나 이상의 스타일을 선택해주세요")
       .required(),
-    image: mixed<FileList>().test(
+    image: mixed<File>().test(
       "fileSize",
       "최대 1MB까지 업로드 가능",
-      (files, context) => {
-        if (files && files.length > 0) {
-          if (files[0].size > 1000000) {
+      (file, context) => {
+        if (file) {
+          if (file.size > 1000000) {
             return context.createError({
               message: "최대 1MB까지 업로드 가능합니다",
             });
@@ -176,9 +177,8 @@ const NewProfile = () => {
   }, [genre]);
 
   useEffect(() => {
-    if (profileImg && profileImg.length > 0) {
-      const file = profileImg[0];
-      setImgPreview(URL.createObjectURL(file));
+    if (profileImg) {
+      setImgPreview(URL.createObjectURL(profileImg));
     }
   }, [profileImg]);
 
@@ -456,13 +456,25 @@ const NewProfile = () => {
                     type="file"
                     accept="image/*"
                     id="image-input"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       if (
                         e.target.files === null ||
                         e.target.files.length === 0
                       )
                         return;
-                      onChange(e.target.files);
+                      const imageFile = e.target.files[0];
+                      const options = { maxSizeMB: 1, maxWidthOrHeight: 1920 };
+                      try {
+                        const compressedFile = await imageCompression(
+                          imageFile,
+                          options
+                        );
+                        onChange(compressedFile);
+                      } catch (error) {
+                        setAlertMsg(
+                          "파일 업로드 중 문제가 발생했습니다 다시 시도해주세요"
+                        );
+                      }
                     }}
                   />
                 )}

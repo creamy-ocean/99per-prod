@@ -130,7 +130,7 @@ export const addProfile = async (
   if (image) {
     const result = await uploadProfileImage(
       changedTabName,
-      image[0],
+      image,
       userId,
       doc.id
     );
@@ -332,7 +332,7 @@ export const updateProfile = async (
   if (image) {
     const result = await uploadProfileImage(
       changedTabName,
-      image[0],
+      image,
       userId,
       docId
     );

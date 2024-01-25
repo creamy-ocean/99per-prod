@@ -8,7 +8,7 @@ export interface FormValues {
   game: string;
   interest: Array<string | undefined>;
   style: Array<string | undefined>;
-  image?: FileList;
+  image?: File;
   intro: string;
   contact: string;
 }

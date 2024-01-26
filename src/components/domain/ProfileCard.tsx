@@ -159,8 +159,6 @@ const ProfileCard = ({
     setLoading(false);
   }, [profile]);
 
-  console.log(profile);
-
   return (
     <>
       {loading ? (

@@ -15,20 +15,79 @@ import {
   Text,
 } from "@chakra-ui/react";
 import ProfileCard from "@components/domain/ProfileCard";
-import { useEffect, useState } from "react";
+import { Timestamp } from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
 
 const MyProfiles = () => {
+  const user = useAuthContext();
+
+  if (!user) return;
+
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currTab, setCurrTab] = useState<string>("친구");
   const [alert, setAlert] = useState<string>("");
-  const user = useAuthContext();
+  // const [lastProfileCreatedAt, setLastProfileCreatedAt] =
+  //   useState<Timestamp | null>(null);
+  // const [hasMore, setHasMore] = useState(true);
+
+  const profileLimit = 6;
+  const bottom = useRef(null);
+  // lastProfileCreatedAt을 ref로 사용한 이유는
+  // state로 관리하면 fetchProfiles 호출 전에 값을 업데이트 할 수 없기 때문
+  const lastProfileCreatedAt = useRef<Timestamp | null>(null);
+  const hasMore = useRef<boolean>(true);
+  const changedTabName = changeTabName(currTab);
+
+  const onIntersection = async (
+    entries: IntersectionObserverEntry[],
+    observer: IntersectionObserver
+  ) => {
+    const entry = entries[0];
+    if (entry.isIntersecting) {
+      console.log("isIntersecting");
+      observer.unobserve(entry.target);
+      fetchProfiles();
+    }
+  };
 
   const fetchProfiles = async () => {
-    const changedTabName = changeTabName(currTab);
-    const data = await getProfiles(changedTabName);
-    const filtered = data.filter((d) => user?.uid === d.userId);
-    setProfiles(filtered);
+    console.log("fetching");
+    console.log(lastProfileCreatedAt);
+    try {
+      const profilesData = await getProfiles(
+        true,
+        changedTabName,
+        user.uid,
+        lastProfileCreatedAt.current
+      );
+      console.log("가져온 데이터 길이: ", profilesData.length);
+      if (profilesData && hasMore.current) {
+        if (profilesData.length < profileLimit) {
+          hasMore.current = false;
+        }
+        setProfiles((prevProfiles) => [...prevProfiles, ...profilesData]);
+        lastProfileCreatedAt.current =
+          profilesData.length > 0
+            ? profilesData[profilesData.length - 1].createdAt
+            : null;
+        console.log(profilesData[profilesData.length - 1]);
+      }
+    } catch (err) {
+      console.log(err);
+      setAlert("프로필을 불러오는 중 오류가 발생했습니다");
+    }
   };
+
+  useEffect(() => {
+    if (profiles.length < 1) return;
+    console.log("profiles useEffect");
+    const observer = new IntersectionObserver(onIntersection, { threshold: 1 });
+    if (observer && bottom.current) observer.observe(bottom.current);
+
+    return () => {
+      observer && observer.disconnect();
+    };
+  }, [profiles]);
 
   const changeTab = (e: React.MouseEvent<HTMLButtonElement>) => {
     const eventTarget = e.target as HTMLButtonElement;
@@ -45,7 +104,13 @@ const MyProfiles = () => {
   };
 
   useEffect(() => {
+    console.log("currTab useEffect");
+    // 탭이 바뀌면 마지막 프로필, hasMore 값 초기화
+    lastProfileCreatedAt.current = null;
+    hasMore.current = true;
+    setProfiles([]);
     fetchProfiles();
+    // 프로필을 가져온 뒤 프로필 목록에서 마지막 프로필 참조
   }, [currTab]);
 
   return (
@@ -83,13 +148,14 @@ const MyProfiles = () => {
                 profile={profile}
                 user={user}
                 tab={currTab}
-                setAlert={setAlert}
                 isOwner={true}
+                setAlert={setAlert}
                 deleteProfile={onDeleteProfile}
               />
             );
           })
         )}
+        {hasMore.current && <div ref={bottom}></div>}
       </Grid>
       {alert && (
         <Alert

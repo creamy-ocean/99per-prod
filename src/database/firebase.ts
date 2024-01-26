@@ -12,6 +12,7 @@ import {
   signOut,
 } from "firebase/auth";
 import {
+  Timestamp,
   addDoc,
   collection,
   deleteDoc,
@@ -20,11 +21,13 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  limit,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
+  startAfter,
   updateDoc,
   where,
   writeBatch,
@@ -151,17 +154,46 @@ const uploadProfileImage = async (
   return await uploadBytes(storageRef, image);
 };
 
-export const getProfiles = async (tab: string) => {
+export const getProfiles = async (
+  isOwner: boolean,
+  tab: string,
+  userId: string,
+  lastProfileCreatedAt: Timestamp | null
+) => {
+  console.log(tab, userId, lastProfileCreatedAt);
+  const constraints = [];
+  // 일반 프로필 목록과 내 프로필 목록 구별
+  isOwner
+    ? constraints.push(where("userId", "==", userId))
+    : constraints.push(where("userId", "!=", userId), limit(6));
+  // 마지막 문서가 있는 경우(프로필 목록이 있는 경우)
+  lastProfileCreatedAt &&
+    constraints.push(startAfter("createdAt", lastProfileCreatedAt));
   const profilesQuery = query(
     collection(db, `${tab}`),
-    orderBy("createdAt", "desc")
+    orderBy("userId"),
+    orderBy("createdAt", "desc"),
+    ...constraints
   );
   const snapshot = await getDocs(profilesQuery);
+  if (snapshot.empty) {
+    console.log("empty");
+  }
   const profiles = snapshot.docs.map((doc) => {
-    const { userId, game, genre, style, interest, image, intro, contact } =
-      doc.data();
+    const {
+      userId,
+      createdAt,
+      game,
+      genre,
+      style,
+      interest,
+      image,
+      intro,
+      contact,
+    } = doc.data();
     return {
       id: doc.id,
+      createdAt,
       userId,
       genre,
       tab: changeTabName(tab),

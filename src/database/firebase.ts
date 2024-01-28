@@ -70,7 +70,10 @@ export const login = (platform: string, callback: () => void) => {
       //   !friends && updateUsersFriends(user.uid, []);
       // });
     })
-    .catch(console.error);
+    .catch((err) => {
+      // 유저가 로그인 팝업을 닫으면 콜백 함수(로딩 false로 만드는 함수) 실행
+      if (err.code === "auth/popup-closed-by-user") callback();
+    });
 };
 
 export const logout = () => {

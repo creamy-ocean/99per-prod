@@ -59,12 +59,13 @@ const providers: Providers = {
   twitter: twitterProvider,
 };
 
-export const login = (platform: string) => {
+export const login = (platform: string, callback: () => void) => {
   signInWithPopup(auth, providers[platform])
     .then(({ user }) => {
       getUserState(user.uid).then((userState) => {
         !userState && addUserState(user.uid, "joined");
       });
+      callback();
       // getUsersFriends(user.uid).then((friends) => {
       //   !friends && updateUsersFriends(user.uid, []);
       // });
@@ -95,7 +96,7 @@ export const getUserState = async (userId: string) => {
     const userState = docSnap.data().state;
     return userState;
   } else {
-    return null;
+    return "joined";
   }
 };
 

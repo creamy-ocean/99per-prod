@@ -15,7 +15,7 @@ import {
   Heading,
   Text,
 } from "@chakra-ui/react";
-import { Timestamp } from "firebase/firestore";
+import { DocumentData } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import ProfileCard from "./ProfileCard";
 import ProfileFilter from "./ProfileFilter";
@@ -38,12 +38,11 @@ const ProfileList = ({ tab }: { tab: string }) => {
     []
   );
   const [hasMore, setHasMore] = useState(true);
+  const [lastProfile, setLastProfile] = useState<DocumentData | null>(null);
 
   const profileLimit = 6;
   const bottom = useRef(null);
   const changedTabName = changeTabName(tab);
-  const lastProfileCreatedAt =
-    profiles.length > 0 ? profiles[profiles.length - 1].createdAt : null;
 
   const onIntersection = async (
     entries: IntersectionObserverEntry[],
@@ -57,16 +56,16 @@ const ProfileList = ({ tab }: { tab: string }) => {
   };
 
   const fetchProfiles = async () => {
-    console.log(lastProfileCreatedAt);
     try {
-      const profilesData = await getProfiles(
+      const { profilesData, lastVisible } = await getProfiles(
         false,
         changedTabName,
         user.uid,
-        lastProfileCreatedAt as Timestamp
+        lastProfile
       );
       profilesData.length < profileLimit && setHasMore(false);
       setProfiles((prevProfiles) => [...prevProfiles, ...profilesData]);
+      setLastProfile(lastVisible);
     } catch (err) {
       console.log(err);
       setAlert("프로필을 불러오는 중 오류가 발생했습니다");

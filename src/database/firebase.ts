@@ -12,7 +12,7 @@ import {
   signOut,
 } from "firebase/auth";
 import {
-  Timestamp,
+  DocumentData,
   addDoc,
   collection,
   deleteDoc,
@@ -158,42 +158,29 @@ export const getProfiles = async (
   isOwner: boolean,
   tab: string,
   userId: string,
-  lastProfileCreatedAt: Timestamp | null
+  lastDoc: DocumentData | null
 ) => {
-  console.log(tab, userId, lastProfileCreatedAt);
   const constraints = [];
   // 일반 프로필 목록과 내 프로필 목록 구별
   isOwner
     ? constraints.push(where("userId", "==", userId))
     : constraints.push(where("userId", "!=", userId), limit(6));
   // 마지막 문서가 있는 경우(프로필 목록이 있는 경우)
-  lastProfileCreatedAt &&
-    constraints.push(startAfter("createdAt", lastProfileCreatedAt));
+  lastDoc && constraints.push(startAfter(lastDoc));
   const profilesQuery = query(
     collection(db, `${tab}`),
     orderBy("userId"),
     orderBy("createdAt", "desc"),
-    ...constraints
+    ...constraints,
+    limit(6)
   );
   const snapshot = await getDocs(profilesQuery);
-  if (snapshot.empty) {
-    console.log("empty");
-  }
-  const profiles = snapshot.docs.map((doc) => {
-    const {
-      userId,
-      createdAt,
-      game,
-      genre,
-      style,
-      interest,
-      image,
-      intro,
-      contact,
-    } = doc.data();
+  const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+  const profilesData = snapshot.docs.map((doc) => {
+    const { userId, game, genre, style, interest, image, intro, contact } =
+      doc.data();
     return {
       id: doc.id,
-      createdAt,
       userId,
       genre,
       tab: changeTabName(tab),
@@ -205,7 +192,7 @@ export const getProfiles = async (
       contact,
     };
   });
-  return profiles;
+  return { profilesData, lastVisible };
 };
 
 export const getBlockedUsers = async (userId: string) => {

@@ -15,7 +15,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import ProfileCard from "@components/domain/ProfileCard";
-import { Timestamp } from "firebase/firestore";
+import { DocumentData } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 
 const MyProfiles = () => {
@@ -26,15 +26,13 @@ const MyProfiles = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currTab, setCurrTab] = useState<string>("친구");
   const [alert, setAlert] = useState<string>("");
-  // const [lastProfileCreatedAt, setLastProfileCreatedAt] =
-  //   useState<Timestamp | null>(null);
-  // const [hasMore, setHasMore] = useState(true);
 
   const profileLimit = 6;
   const bottom = useRef(null);
-  // lastProfileCreatedAt을 ref로 사용한 이유는
+  // lastProfile과 hasMore를 ref로 관리하는 이유는
   // state로 관리하면 fetchProfiles 호출 전에 값을 업데이트 할 수 없기 때문
-  const lastProfileCreatedAt = useRef<Timestamp | null>(null);
+  // (state로 관리하면 탭을 변경해도 값이 유지되는 현상 발생)
+  const lastProfile = useRef<DocumentData | null>(null);
   const hasMore = useRef<boolean>(true);
   const changedTabName = changeTabName(currTab);
 
@@ -51,36 +49,27 @@ const MyProfiles = () => {
   };
 
   const fetchProfiles = async () => {
-    console.log("fetching");
-    console.log(lastProfileCreatedAt);
     try {
-      const profilesData = await getProfiles(
+      const { profilesData, lastVisible } = await getProfiles(
         true,
         changedTabName,
         user.uid,
-        lastProfileCreatedAt.current
+        lastProfile.current
       );
-      console.log("가져온 데이터 길이: ", profilesData.length);
       if (profilesData && hasMore.current) {
         if (profilesData.length < profileLimit) {
           hasMore.current = false;
         }
         setProfiles((prevProfiles) => [...prevProfiles, ...profilesData]);
-        lastProfileCreatedAt.current =
-          profilesData.length > 0
-            ? profilesData[profilesData.length - 1].createdAt
-            : null;
-        console.log(profilesData[profilesData.length - 1]);
+        lastProfile.current = lastVisible;
       }
     } catch (err) {
-      console.log(err);
       setAlert("프로필을 불러오는 중 오류가 발생했습니다");
     }
   };
 
   useEffect(() => {
     if (profiles.length < 1) return;
-    console.log("profiles useEffect");
     const observer = new IntersectionObserver(onIntersection, { threshold: 1 });
     if (observer && bottom.current) observer.observe(bottom.current);
 
@@ -104,13 +93,11 @@ const MyProfiles = () => {
   };
 
   useEffect(() => {
-    console.log("currTab useEffect");
     // 탭이 바뀌면 마지막 프로필, hasMore 값 초기화
-    lastProfileCreatedAt.current = null;
+    lastProfile.current = null;
     hasMore.current = true;
     setProfiles([]);
     fetchProfiles();
-    // 프로필을 가져온 뒤 프로필 목록에서 마지막 프로필 참조
   }, [currTab]);
 
   return (

@@ -32,7 +32,11 @@ const ProtectedRoute = ({ children, page }: Props) => {
         <Navigate to="/" replace={true} />
       );
     case "home":
-      return userState ? <Navigate to="/friends" replace={true} /> : children;
+      return userState === "certified" ? (
+        <Navigate to="/friends" replace={true} />
+      ) : (
+        children
+      );
     default:
       return userState ? children : <Navigate to="/" replace={true} />;
   }

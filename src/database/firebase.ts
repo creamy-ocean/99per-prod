@@ -12,6 +12,7 @@ import {
   signOut,
 } from "firebase/auth";
 import {
+  DocumentData,
   addDoc,
   collection,
   deleteDoc,
@@ -20,11 +21,13 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  limit,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
+  startAfter,
   updateDoc,
   where,
   writeBatch,
@@ -56,27 +59,35 @@ const providers: Providers = {
   twitter: twitterProvider,
 };
 
-export const login = (platform: string) => {
-  signInWithPopup(auth, providers[platform])
-    .then(({ user }) => {
-      getUserState(user.uid).then((userState) => {
-        !userState && addUserState(user.uid, "joined");
-      });
-      // getUsersFriends(user.uid).then((friends) => {
-      //   !friends && updateUsersFriends(user.uid, []);
-      // });
-    })
-    .catch(console.error);
+export const login = async (platform: string, callback: () => void) => {
+  try {
+    await signInWithPopup(auth, providers[platform]);
+    callback();
+  } catch (err: any) {
+    if (err.code === "auth/popup-closed-by-user") callback();
+  }
+  // getUsersFriends(user.uid).then((friends) => {
+  //   !friends && updateUsersFriends(user.uid, []);
+  // });
 };
 
-export const logout = () => {
-  signOut(auth).catch(console.error);
+export const logout = async () => {
+  await signOut(auth);
 };
 
 export const onUserStateChanged = (callback: any) => {
   onAuthStateChanged(auth, async (user) => {
-    const userState = user ? await getUserState(user.uid) : null;
-    callback({ ...user, userState });
+    if (user) {
+      const userState = await getUserState(user.uid);
+      if (userState) {
+        callback({ ...user, userState });
+      } else {
+        const addedUserState = await addUserState(user.uid, "joined");
+        callback({ ...user, userState: addedUserState });
+      }
+    } else {
+      callback({ user: null, userState: null });
+    }
   });
 };
 
@@ -84,6 +95,7 @@ const addUserState = async (userId: string, userState: string) => {
   await setDoc(doc(db, "users", userId), {
     state: userState,
   });
+  return userState;
 };
 
 export const getUserState = async (userId: string) => {
@@ -130,7 +142,7 @@ export const addProfile = async (
   if (image) {
     const result = await uploadProfileImage(
       changedTabName,
-      image[0],
+      image,
       userId,
       doc.id
     );
@@ -151,13 +163,29 @@ const uploadProfileImage = async (
   return await uploadBytes(storageRef, image);
 };
 
-export const getProfiles = async (tab: string) => {
+export const getProfiles = async (
+  isOwner: boolean,
+  tab: string,
+  userId: string,
+  lastDoc: DocumentData | null
+) => {
+  const constraints = [];
+  // 일반 프로필 목록과 내 프로필 목록 구별
+  isOwner
+    ? constraints.push(where("userId", "==", userId))
+    : constraints.push(where("userId", "!=", userId), limit(6));
+  // 마지막 문서가 있는 경우(프로필 목록이 있는 경우)
+  lastDoc && constraints.push(startAfter(lastDoc));
   const profilesQuery = query(
     collection(db, `${tab}`),
-    orderBy("createdAt", "desc")
+    orderBy("userId"),
+    orderBy("createdAt", "desc"),
+    ...constraints,
+    limit(6)
   );
   const snapshot = await getDocs(profilesQuery);
-  const profiles = snapshot.docs.map((doc) => {
+  const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+  const profilesData = snapshot.docs.map((doc) => {
     const { userId, game, genre, style, interest, image, intro, contact } =
       doc.data();
     return {
@@ -173,7 +201,7 @@ export const getProfiles = async (tab: string) => {
       contact,
     };
   });
-  return profiles;
+  return { profilesData, lastVisible };
 };
 
 export const getBlockedUsers = async (userId: string) => {
@@ -332,7 +360,7 @@ export const updateProfile = async (
   if (image) {
     const result = await uploadProfileImage(
       changedTabName,
-      image[0],
+      image,
       userId,
       docId
     );
@@ -580,6 +608,17 @@ const getProfileById = async (profileId: string, tab: string) => {
     return { id: docSnap.id, ...rest };
   } else {
     return {};
+  }
+};
+
+export const getRelativeProfileIds = async (tab: string, userId: string) => {
+  const profilesQuery = query(collection(db, `relationships/${tab}/${userId}`));
+  const snapshot = await getDocs(profilesQuery);
+  if (snapshot.empty) {
+    return [];
+  } else {
+    const profileIds = snapshot.docs.map((doc) => doc.data().pairProfileId);
+    return profileIds;
   }
 };
 

@@ -8,13 +8,13 @@ export interface FormValues {
   game: string;
   interest: Array<string | undefined>;
   style: Array<string | undefined>;
-  image?: FileList;
+  image?: File;
   intro: string;
   contact: string;
 }
 
 export interface Profile {
-  [key: string]: string | Array<string>;
+  [key: string]: any;
   id: string;
   userId: string;
   game: string;

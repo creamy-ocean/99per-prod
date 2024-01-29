@@ -35,6 +35,7 @@ interface ProfileProps {
   isOwner?: boolean;
   isReceived?: boolean;
   isFriend?: boolean;
+  isRelative?: boolean;
   approveRequest?: (
     requestId: string,
     profileId: string,
@@ -61,6 +62,7 @@ const ProfileCard = ({
   isOwner,
   isReceived,
   isFriend,
+  isRelative,
   approveRequest,
   rejectRequest,
   deleteProfile,
@@ -87,9 +89,15 @@ const ProfileCard = ({
   const checkRequestId = async () => {
     const result = await getRequestId(user.uid, userId, tab, game);
     setRequestId(result);
+    return result;
   };
 
   const onAddRequest = async () => {
+    const _requestId = await checkRequestId();
+    if (_requestId) {
+      setAlertMsg(`이미 ${tab} ${msg} 요청을 보냈습니다`);
+      return;
+    }
     const senderUserProfileId = await getProfileId("friends", user.uid, game);
     if (senderUserProfileId) {
       const requestId = await addRequest(
@@ -151,8 +159,6 @@ const ProfileCard = ({
     setLoading(false);
   }, [profile]);
 
-  console.log(profile);
-
   return (
     <>
       {loading ? (
@@ -206,7 +212,12 @@ const ProfileCard = ({
               color="#999"
               sx={{ i: { cursor: "pointer" } }}
             >
-              {isOwner ? (
+              {isRelative ? (
+                <i
+                  className="fa-solid fa-user-group"
+                  style={{ cursor: "default" }}
+                ></i>
+              ) : isOwner ? (
                 <>
                   <Link to="/newProfile" state={{ profile }}>
                     <i

@@ -1,6 +1,7 @@
 import Certify from "@/pages/Certify";
 import ErrorPage from "@/pages/ErrorPage";
 import Friends from "@/pages/Friends";
+import Guilds from "@/pages/Guilds";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import MyFriends from "@/pages/MyFriends";
@@ -9,7 +10,6 @@ import MyRequests from "@/pages/MyRequests";
 import NewProfile from "@/pages/NewProfile";
 import Parties from "@/pages/Parties";
 import Root from "@/pages/Root";
-import Guilds from "@/pages/guilds";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -19,23 +19,86 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <Home /> },
+      {
+        index: true,
+        element: (
+          <ProtectedRoute page={"home"}>
+            <Home />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: "/join",
         element: (
-          <ProtectedRoute certRequired>
+          <ProtectedRoute page={"join"}>
             <Login />
           </ProtectedRoute>
         ),
       },
-      { path: "/certify", element: <Certify /> },
-      { path: "/friends", element: <Friends /> },
-      { path: "/guilds", element: <Guilds /> },
-      { path: "/parties", element: <Parties /> },
-      { path: "/newProfile", element: <NewProfile /> },
-      { path: "/myProfiles", element: <MyProfiles /> },
-      { path: "/myRequests", element: <MyRequests /> },
-      { path: "/myFriends", element: <MyFriends /> },
+      {
+        path: "/certify",
+        element: (
+          <ProtectedRoute page={"certify"}>
+            <Certify />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/friends",
+        element: (
+          <ProtectedRoute>
+            <Friends />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/guilds",
+        element: (
+          <ProtectedRoute>
+            <Guilds />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/parties",
+        element: (
+          <ProtectedRoute>
+            <Parties />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/newProfile",
+        element: (
+          <ProtectedRoute>
+            <NewProfile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/myProfiles",
+        element: (
+          <ProtectedRoute>
+            <MyProfiles />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/myRequests",
+        element: (
+          <ProtectedRoute>
+            <MyRequests />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/myFriends",
+        element: (
+          <ProtectedRoute>
+            <MyFriends />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);

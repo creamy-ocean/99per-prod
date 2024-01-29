@@ -1,5 +1,9 @@
 import { useAuthContext } from "@/context/AuthContext";
-import { getBlockedUsers, getProfiles } from "@/database/firebase";
+import {
+  getBlockedUsers,
+  getProfiles,
+  getRelativeProfileIds,
+} from "@/database/firebase";
 import { Filters, Profile } from "@/types/types";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import {
@@ -11,11 +15,16 @@ import {
   Heading,
   Text,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { DocumentData } from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
 import ProfileCard from "./ProfileCard";
 import ProfileFilter from "./ProfileFilter";
 
 const ProfileList = ({ tab }: { tab: string }) => {
+  const user = useAuthContext();
+
+  if (!user) return;
+
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [filters, setFilters] = useState<Filters>({
     game: [],
@@ -25,20 +34,65 @@ const ProfileList = ({ tab }: { tab: string }) => {
   const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
   const [alert, setAlert] = useState<string>("");
   const [blockedUsers, setBlockedUsers] = useState<Array<string>>([]);
-  const user = useAuthContext();
+  const [relativeProfileIds, setRelativeProfileIds] = useState<Array<string>>(
+    []
+  );
+  const [hasMore, setHasMore] = useState(true);
+  const [lastProfile, setLastProfile] = useState<DocumentData | null>(null);
 
-  if (!user) return;
+  const profileLimit = 6;
+  const bottom = useRef(null);
+  const changedTabName = changeTabName(tab);
+
+  const onIntersection = async (
+    entries: IntersectionObserverEntry[],
+    observer: IntersectionObserver
+  ) => {
+    const entry = entries[0];
+    if (entry.isIntersecting) {
+      observer.unobserve(entry.target);
+      fetchProfiles();
+    }
+  };
 
   const fetchProfiles = async () => {
-    const changedTabName = changeTabName(tab);
+    try {
+      const { profilesData, lastVisible } = await getProfiles(
+        false,
+        changedTabName,
+        user.uid,
+        lastProfile
+      );
+      profilesData.length < profileLimit && setHasMore(false);
+      setProfiles((prevProfiles) => [...prevProfiles, ...profilesData]);
+      setLastProfile(lastVisible);
+    } catch (err) {
+      console.log(err);
+      setAlert("프로필을 불러오는 중 오류가 발생했습니다");
+    }
+  };
+
+  const preset = async () => {
     setBlockedUsers(await getBlockedUsers(user.uid));
-    const data = await getProfiles(changedTabName);
-    setProfiles(data);
+    setRelativeProfileIds(
+      await getRelativeProfileIds(changedTabName, user.uid)
+    );
+    fetchProfiles();
   };
 
   useEffect(() => {
-    fetchProfiles();
+    preset();
   }, []);
+
+  useEffect(() => {
+    if (profiles.length < 1) return;
+    const observer = new IntersectionObserver(onIntersection, { threshold: 1 });
+    if (observer && bottom.current) observer.observe(bottom.current);
+
+    return () => {
+      observer && observer.disconnect();
+    };
+  }, [profiles]);
 
   const checkFilters = () => {
     for (const filter in filters) {
@@ -52,9 +106,9 @@ const ProfileList = ({ tab }: { tab: string }) => {
   const checkIfProfileMatchesFilters = (profile: Profile) => {
     for (const filterName of Object.keys(filters)) {
       if (filters[filterName].length > 0) {
-        const found = filters[filterName].every((filterValue) =>
-          profile[filterName].includes(filterValue)
-        );
+        const found = filters[filterName].every((filterValue) => {
+          profile[filterName].includes(filterValue);
+        });
         if (found === false) return false;
       }
     }
@@ -90,9 +144,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
             <Text textAlign="center">프로필이 없습니다</Text>
           ) : (
             profiles.map((profile, idx) => {
-              if (profile.userId === user?.uid) {
-                return;
-              } else if (blockedUsers.includes(profile.userId)) {
+              if (blockedUsers.includes(profile.userId)) {
                 return;
               } else {
                 return (
@@ -101,6 +153,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
                     profile={profile}
                     user={user}
                     tab={tab}
+                    isRelative={relativeProfileIds.includes(profile.id)}
                     setAlert={setAlert}
                   />
                 );
@@ -111,19 +164,15 @@ const ProfileList = ({ tab }: { tab: string }) => {
           <Text textAlign="center">해당하는 프로필이 없습니다</Text>
         ) : (
           filteredProfiles.map((profile, idx) => {
-            if (profile.userId === user?.uid) {
-              return;
-            } else {
-              return (
-                <ProfileCard
-                  key={idx}
-                  profile={profile}
-                  user={user}
-                  tab={tab}
-                  setAlert={setAlert}
-                />
-              );
-            }
+            return (
+              <ProfileCard
+                key={idx}
+                profile={profile}
+                user={user}
+                tab={tab}
+                setAlert={setAlert}
+              />
+            );
           })
         )}
       </Grid>
@@ -145,6 +194,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
           {alert}
         </Alert>
       )}
+      {hasMore && <div ref={bottom}></div>}
     </Flex>
   );
 };

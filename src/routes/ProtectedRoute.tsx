@@ -3,18 +3,15 @@ import { Navigate } from "react-router-dom";
 
 interface Props {
   children: React.ReactNode;
-  certRequired?: boolean;
+  page?: string;
 }
 
-const ProtectedRoute = ({ children, certRequired }: Props) => {
+const ProtectedRoute = ({ children, page }: Props) => {
   const user = useAuthContext();
   const userState = user?.userState;
 
-  if (certRequired) {
-    if (!user) {
-      console.log("No user found");
-      return children;
-    } else {
+  switch (page) {
+    case "join":
       return userState ? (
         user.userState === "joined" ? (
           <Navigate to="/certify" replace={true} />
@@ -24,10 +21,24 @@ const ProtectedRoute = ({ children, certRequired }: Props) => {
       ) : (
         children
       );
-    }
-  } else {
-    console.log("No certRequired");
-    return user ? <Navigate to="/" replace={true} /> : children;
+    case "certify":
+      return userState ? (
+        user.userState === "certified" ? (
+          <Navigate to="/friends" replace={true} />
+        ) : (
+          children
+        )
+      ) : (
+        <Navigate to="/" replace={true} />
+      );
+    case "home":
+      return userState === "certified" ? (
+        <Navigate to="/friends" replace={true} />
+      ) : (
+        children
+      );
+    default:
+      return userState ? children : <Navigate to="/" replace={true} />;
   }
 };
 

@@ -59,21 +59,16 @@ const providers: Providers = {
   twitter: twitterProvider,
 };
 
-export const login = (platform: string, callback: () => void) => {
-  signInWithPopup(auth, providers[platform])
-    .then(({ user }) => {
-      getUserState(user.uid).then((userState) => {
-        !userState && addUserState(user.uid, "joined");
-      });
-      callback();
-      // getUsersFriends(user.uid).then((friends) => {
-      //   !friends && updateUsersFriends(user.uid, []);
-      // });
-    })
-    .catch((err) => {
-      // 유저가 로그인 팝업을 닫으면 콜백 함수(로딩 false로 만드는 함수) 실행
-      if (err.code === "auth/popup-closed-by-user") callback();
-    });
+export const login = async (platform: string, callback: () => void) => {
+  try {
+    await signInWithPopup(auth, providers[platform]);
+    callback();
+  } catch (err: any) {
+    if (err.code === "auth/popup-closed-by-user") callback();
+  }
+  // getUsersFriends(user.uid).then((friends) => {
+  //   !friends && updateUsersFriends(user.uid, []);
+  // });
 };
 
 export const logout = () => {
@@ -82,8 +77,17 @@ export const logout = () => {
 
 export const onUserStateChanged = (callback: any) => {
   onAuthStateChanged(auth, async (user) => {
-    const userState = user ? await getUserState(user.uid) : null;
-    callback({ ...user, userState });
+    if (user) {
+      const userState = await getUserState(user.uid);
+      if (userState) {
+        callback({ ...user, userState });
+      } else {
+        const addedUserState = await addUserState(user.uid, "joined");
+        callback({ ...user, userState: addedUserState });
+      }
+    } else {
+      callback({ user: null, userState: null });
+    }
   });
 };
 
@@ -91,6 +95,7 @@ const addUserState = async (userId: string, userState: string) => {
   await setDoc(doc(db, "users", userId), {
     state: userState,
   });
+  return userState;
 };
 
 export const getUserState = async (userId: string) => {
@@ -99,7 +104,7 @@ export const getUserState = async (userId: string) => {
     const userState = docSnap.data().state;
     return userState;
   } else {
-    return "joined";
+    return null;
   }
 };
 

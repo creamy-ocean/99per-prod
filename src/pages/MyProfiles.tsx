@@ -42,7 +42,6 @@ const MyProfiles = () => {
   ) => {
     const entry = entries[0];
     if (entry.isIntersecting) {
-      console.log("isIntersecting");
       observer.unobserve(entry.target);
       fetchProfiles();
     }

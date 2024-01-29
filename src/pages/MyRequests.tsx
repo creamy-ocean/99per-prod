@@ -60,7 +60,6 @@ const MyRequests = () => {
   };
 
   const rejectRequest = (requestId: string, profileId: string) => {
-    console.log("onReject", requestId, profileId);
     deleteRequest(requestId);
     setProfiles((prev) => prev.filter((p) => p.id !== profileId));
   };

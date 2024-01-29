@@ -71,8 +71,8 @@ export const login = async (platform: string, callback: () => void) => {
   // });
 };
 
-export const logout = () => {
-  signOut(auth).catch(console.error);
+export const logout = async () => {
+  await signOut(auth);
 };
 
 export const onUserStateChanged = (callback: any) => {

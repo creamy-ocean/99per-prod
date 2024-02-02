@@ -4,8 +4,8 @@ import {
   getProfiles,
   getRelativeProfileIds,
 } from "@/database/firebase";
-import { Filters, Profile } from "@/types/types";
-import { changeTabName, isArrayEmpty } from "@/utils/functions";
+import { Filters } from "@/types/types";
+import { changeTabName } from "@/utils/functions";
 import {
   Alert,
   AlertIcon,
@@ -15,8 +15,10 @@ import {
   Heading,
   Text,
 } from "@chakra-ui/react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { DocumentData } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
+import { MoonLoader } from "react-spinners";
 import ProfileCard from "./ProfileCard";
 import ProfileFilter from "./ProfileFilter";
 
@@ -25,74 +27,21 @@ const ProfileList = ({ tab }: { tab: string }) => {
 
   if (!user) return;
 
-  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [filters, setFilters] = useState<Filters>({
     game: [],
     interest: [],
     style: [],
   });
-  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
   const [alert, setAlert] = useState<string>("");
   const [blockedUsers, setBlockedUsers] = useState<Array<string>>([]);
   const [relativeProfileIds, setRelativeProfileIds] = useState<Array<string>>(
     []
   );
-  const [hasMore, setHasMore] = useState(true);
   const [lastProfile, setLastProfile] = useState<DocumentData | null>(null);
 
   const profileLimit = 6;
   const bottom = useRef(null);
   const changedTabName = changeTabName(tab);
-
-  const onIntersection = async (
-    entries: IntersectionObserverEntry[],
-    observer: IntersectionObserver
-  ) => {
-    const entry = entries[0];
-    if (entry.isIntersecting) {
-      observer.unobserve(entry.target);
-      fetchProfiles();
-    }
-  };
-
-  const fetchProfiles = async () => {
-    try {
-      const { profilesData, lastVisible } = await getProfiles(
-        false,
-        changedTabName,
-        user.uid,
-        lastProfile
-      );
-      profilesData.length < profileLimit && setHasMore(false);
-      setProfiles((prevProfiles) => [...prevProfiles, ...profilesData]);
-      setLastProfile(lastVisible);
-    } catch (err) {
-      console.log(err);
-      setAlert("프로필을 불러오는 중 오류가 발생했습니다");
-    }
-  };
-
-  const preset = async () => {
-    setBlockedUsers(await getBlockedUsers(user.uid));
-    setRelativeProfileIds(
-      await getRelativeProfileIds(changedTabName, user.uid)
-    );
-    fetchProfiles();
-  };
-
-  useEffect(() => {
-    preset();
-  }, []);
-
-  useEffect(() => {
-    if (profiles.length < 1) return;
-    const observer = new IntersectionObserver(onIntersection, { threshold: 1 });
-    if (observer && bottom.current) observer.observe(bottom.current);
-
-    return () => {
-      observer && observer.disconnect();
-    };
-  }, [profiles]);
 
   const checkFilters = () => {
     for (const filter in filters) {
@@ -103,21 +52,106 @@ const ProfileList = ({ tab }: { tab: string }) => {
 
   const isFiltersEmpty = checkFilters();
 
-  const checkIfProfileMatchesFilters = (profile: Profile) => {
+  const checkIfDocumentMatchesFilters = (doc: DocumentData) => {
     for (const filterName of Object.keys(filters)) {
       if (filters[filterName].length > 0) {
-        const found = filters[filterName].every((filterValue) => {
-          profile[filterName].includes(filterValue);
-        });
+        const found = filters[filterName].every((filterValue) =>
+          doc[filterName].includes(filterValue)
+        );
         if (found === false) return false;
       }
     }
     return true;
   };
 
+  const { data, isError, isLoading, hasNextPage, fetchNextPage } =
+    useInfiniteQuery({
+      queryKey: ["profiles"],
+      queryFn: (pageParam) => {
+        return getProfiles(
+          false,
+          changedTabName,
+          user.uid,
+          pageParam.pageParam
+        );
+      },
+      select: (data) =>
+        data.pages.flatMap((snapshot) => {
+          const filtered = isFiltersEmpty
+            ? snapshot.docs
+            : snapshot.docs.filter((doc) => {
+                return checkIfDocumentMatchesFilters(doc.data());
+              });
+          return filtered.map((doc) => {
+            const {
+              userId,
+              game,
+              genre,
+              style,
+              interest,
+              image,
+              intro,
+              contact,
+            } = doc.data();
+            return {
+              id: doc.id,
+              userId,
+              genre,
+              tab: changeTabName(tab),
+              game,
+              style,
+              interest,
+              image,
+              intro,
+              contact,
+            };
+          });
+        }),
+      initialPageParam: lastProfile,
+      getNextPageParam: (querySnapshot) => {
+        if (querySnapshot.size < profileLimit) {
+          return undefined;
+        } else {
+          return querySnapshot.docs[querySnapshot.docs.length - 1];
+        }
+      },
+    });
+
+  if (isError) {
+    setAlert("프로필 목록을 불러오는 중 오류가 발생했습니다 새로고침 해주세요");
+  }
+
+  const preset = async () => {
+    setBlockedUsers(await getBlockedUsers(user.uid));
+    setRelativeProfileIds(
+      await getRelativeProfileIds(changedTabName, user.uid)
+    );
+  };
+
+  const onIntersection = async (
+    entries: IntersectionObserverEntry[],
+    observer: IntersectionObserver
+  ) => {
+    const entry = entries[0];
+    if (entry.isIntersecting && hasNextPage) {
+      observer.unobserve(entry.target);
+      fetchNextPage();
+    }
+  };
+
   useEffect(() => {
-    setFilteredProfiles(profiles.filter(checkIfProfileMatchesFilters));
-  }, [filters]);
+    preset();
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+    const observer = new IntersectionObserver(onIntersection, { threshold: 1 });
+    if (observer && bottom.current) observer.observe(bottom.current);
+
+    return () => {
+      observer && observer.disconnect();
+    };
+  }, [data]);
 
   return (
     <Flex
@@ -138,41 +172,37 @@ const ProfileList = ({ tab }: { tab: string }) => {
       <Divider w="80%" mt="4" mb="8" />
       <ProfileFilter tab={tab} filters={filters} setFilters={setFilters} />
       <Divider w="80%" mt="4" mb="8" />
+      {isLoading && (
+        <Flex justify="center">
+          <MoonLoader
+            size={40}
+            color="#5096F2"
+            style={{
+              marginTop: "2rem",
+              backgroundColor: "#E6F2FD",
+            }}
+          />
+        </Flex>
+      )}
       <Grid gap="2" w="80%">
-        {isFiltersEmpty ? (
-          isArrayEmpty(profiles) ? (
-            <Text textAlign="center">프로필이 없습니다</Text>
-          ) : (
-            profiles.map((profile, idx) => {
-              if (blockedUsers.includes(profile.userId)) {
-                return;
-              } else {
-                return (
-                  <ProfileCard
-                    key={idx}
-                    profile={profile}
-                    user={user}
-                    tab={tab}
-                    isRelative={relativeProfileIds.includes(profile.id)}
-                    setAlert={setAlert}
-                  />
-                );
-              }
-            })
-          )
-        ) : isArrayEmpty(filteredProfiles) ? (
-          <Text textAlign="center">해당하는 프로필이 없습니다</Text>
+        {data?.length === 0 ? (
+          <Text textAlign="center">등록된 프로필이 없습니다</Text>
         ) : (
-          filteredProfiles.map((profile, idx) => {
-            return (
-              <ProfileCard
-                key={idx}
-                profile={profile}
-                user={user}
-                tab={tab}
-                setAlert={setAlert}
-              />
-            );
+          data?.map((profile, idx) => {
+            if (blockedUsers.includes(profile.userId)) {
+              return;
+            } else {
+              return (
+                <ProfileCard
+                  key={idx}
+                  profile={profile}
+                  user={user}
+                  tab={tab}
+                  isRelative={relativeProfileIds.includes(profile.id)}
+                  setAlert={setAlert}
+                />
+              );
+            }
           })
         )}
       </Grid>
@@ -194,7 +224,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
           {alert}
         </Alert>
       )}
-      {hasMore && <div ref={bottom}></div>}
+      {hasNextPage && <div ref={bottom}></div>}
     </Flex>
   );
 };

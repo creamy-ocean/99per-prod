@@ -184,24 +184,7 @@ export const getProfiles = async (
     limit(6)
   );
   const snapshot = await getDocs(profilesQuery);
-  const lastVisible = snapshot.docs[snapshot.docs.length - 1];
-  const profilesData = snapshot.docs.map((doc) => {
-    const { userId, game, genre, style, interest, image, intro, contact } =
-      doc.data();
-    return {
-      id: doc.id,
-      userId,
-      genre,
-      tab: changeTabName(tab),
-      game,
-      style,
-      interest,
-      image,
-      intro,
-      contact,
-    };
-  });
-  return { profilesData, lastVisible };
+  return snapshot;
 };
 
 export const getBlockedUsers = async (userId: string) => {
@@ -377,7 +360,6 @@ export const deleteProfile = async (
   game: string,
   userId: string | undefined
 ) => {
-  console.log(userId);
   if (!userId) return;
   const changedTabName = changeTabName(tab);
   await deleteDoc(doc(db, changedTabName, id));
@@ -394,7 +376,6 @@ export const deleteRequest = async (
   tab?: string,
   game?: string
 ) => {
-  console.log("deleteRequest");
   if (requestId) {
     deleteDoc(doc(db, `requests/${requestId}`));
   } else if (fieldName) {

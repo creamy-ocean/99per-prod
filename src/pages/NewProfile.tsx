@@ -259,11 +259,11 @@ const NewProfile = () => {
           )}
         </Tabs>
         <form id="profile-form" onSubmit={handleSubmit(onSubmit)}>
-          <label style={{ marginTop: "8", fontWeight: "bold", color: "#555"}}>
+          <label style={{ marginTop: "8", fontWeight: "bold", color: "#555" }}>
             게임
-            <span style={{color: '#E53E3E'}}> *</span>
+            <span style={{ color: "#E53E3E" }}> *</span>
           </label>
-          <Grid templateColumns="1fr 1fr" mt='2'>
+          <Grid templateColumns="1fr 1fr" mt="2">
             <FormControl
               sx={{
                 select: { fontSize: "0.9rem" },
@@ -341,10 +341,9 @@ const NewProfile = () => {
               },
             }}
             isInvalid={!!errors?.interest}
-            isRequired
           >
             <FormLabel mt="8" fontWeight="bold" color="#555">
-              관심사
+              관심사 <span style={{ color: "#E53E3E" }}> *</span>
             </FormLabel>
             <Controller
               name="interest"
@@ -376,10 +375,9 @@ const NewProfile = () => {
               },
             }}
             isInvalid={!!errors.style}
-            isRequired
           >
             <FormLabel mt="8" fontWeight="bold" color="#555">
-              플레이 스타일
+              플레이 스타일 <span style={{ color: "#E53E3E" }}> *</span>
             </FormLabel>
             <Controller
               name="style"
@@ -494,7 +492,6 @@ const NewProfile = () => {
               },
             }}
             isInvalid={!!errors?.intro}
-            isRequired
           >
             <FormLabel mt="8" fontWeight="bold" color="#555">
               {currTab === "친구"
@@ -502,7 +499,7 @@ const NewProfile = () => {
                 : currTab === "파티"
                   ? "파티"
                   : "길드"}{" "}
-              소개
+              소개 <span style={{ color: "#E53E3E" }}> *</span>
             </FormLabel>
             <Controller
               control={control}
@@ -543,10 +540,9 @@ const NewProfile = () => {
               },
             }}
             isInvalid={!!errors?.contact}
-            isRequired
           >
             <FormLabel mt="8" fontWeight="bold" color="#555">
-              연락처
+              연락처 <span style={{ color: "#E53E3E" }}> *</span>
             </FormLabel>
             <Input
               {...register("contact")}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormValues, Noti, Profile } from "@/types/types";
 import { config } from "@/utils/config";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
@@ -129,7 +130,7 @@ export const getUserState = async (userId: string) => {
 
 export const addProfile = async (
   tab: string,
-  userId: string | undefined,
+  userId: string,
   values: FormValues
 ) => {
   const changedTabName = changeTabName(tab);
@@ -207,7 +208,7 @@ export const getBlockedUsers = async (userId: string) => {
 
 export const getProfileId = async (
   tab: string,
-  userId: string | undefined,
+  userId: string,
   game: string
 ) => {
   const profileQuery = query(
@@ -331,7 +332,7 @@ export const updateNotiReadOption = async (notiIds: Array<string>) => {
 };
 
 export const updateProfile = async (
-  userId: string | undefined,
+  userId: string,
   docId: string,
   tab: string,
   values: FormValues
@@ -358,7 +359,7 @@ export const deleteProfile = async (
   id: string,
   tab: string,
   game: string,
-  userId: string | undefined
+  userId: string
 ) => {
   if (!userId) return;
   const changedTabName = changeTabName(tab);
@@ -455,7 +456,7 @@ const deleteRelationship = async (
 };
 
 export const getProfilesFromRequests = async (
-  userId: string | undefined,
+  userId: string,
   type: string,
   tab: string
 ) => {
@@ -496,7 +497,7 @@ export const getProfilesFromRequests = async (
 };
 
 const getProfileIdsFromRequests = async (
-  userId: string | undefined,
+  userId: string,
   type: string,
   tab: string
 ) => {
@@ -524,7 +525,7 @@ const getProfileIdsFromRequests = async (
 
 export const addRelationship = async (
   pairUserProfileId: string,
-  userId: string | undefined,
+  userId: string,
   pairUserId: string,
   tab: string,
   game: string
@@ -585,6 +586,7 @@ export const getProfilesFromRelationships = async (
 const getProfileById = async (profileId: string, tab: string) => {
   const docSnap = await getDoc(doc(db, `${tab}`, profileId));
   if (docSnap.exists()) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, createdAt, ...rest } = docSnap.data();
     return { id: docSnap.id, ...rest };
   } else {

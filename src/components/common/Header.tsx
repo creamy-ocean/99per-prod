@@ -1,10 +1,9 @@
-import { useAuthContext } from "@/context/AuthContext";
 import {
   getNotifications,
   logout,
   updateNotiReadOption,
 } from "@/database/firebase";
-import { Noti } from "@/types/types";
+import { Noti, UserInterface } from "@/types/types";
 import { isArrayEmpty } from "@/utils/functions";
 import { AddIcon, CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import {
@@ -35,7 +34,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-interface Props {
+interface NavLinkProps {
   children: {
     name: string;
     href: string;
@@ -48,7 +47,7 @@ const Links = [
   { name: "길드", href: "/guilds" },
 ];
 
-const NavLink = ({ children }: Props) => {
+const NavLink = ({ children }: NavLinkProps) => {
   const { name, href } = children;
   return (
     <Box
@@ -69,10 +68,9 @@ const NavLink = ({ children }: Props) => {
   );
 };
 
-const Header = () => {
+const Header = ({ user }: { user: UserInterface }) => {
   const [notiList, setNotiList] = useState<Array<Noti>>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const user = useAuthContext();
 
   const readNotifications = (notiId?: string) => {
     if (isArrayEmpty(notiList)) return;
@@ -87,7 +85,6 @@ const Header = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
     getNotifications(user.uid, setNotiList);
   }, []);
 
@@ -166,8 +163,8 @@ const Header = () => {
                         noti.tab === "친구"
                           ? "추가"
                           : noti.tab === "파티"
-                          ? "참여"
-                          : "가입";
+                            ? "참여"
+                            : "가입";
                       return (
                         <ListItem
                           key={idx}

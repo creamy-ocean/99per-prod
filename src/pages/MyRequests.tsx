@@ -1,10 +1,9 @@
-import { useAuthContext } from "@/context/AuthContext";
 import {
   addRelationship,
   deleteRequest,
   getProfilesFromRequests,
 } from "@/database/firebase";
-import { Profile } from "@/types/types";
+import { Profile, UserInterface } from "@/types/types";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import {
   Alert,
@@ -20,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import ProfileCard from "@components/domain/ProfileCard";
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 
 const MyRequests = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -27,13 +27,13 @@ const MyRequests = () => {
   const [secondTab, setSecondTab] = useState<string>("친구");
   const [alert, setAlert] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const user = useAuthContext();
+  const user = useOutletContext<UserInterface>();
 
   const fetchProfiles = async () => {
     const changedFirstTabName = changeTabName(firstTab);
     const changedSecondTabName = changeTabName(secondTab);
     const data = await getProfilesFromRequests(
-      user?.uid,
+      user.uid,
       changedFirstTabName,
       changedSecondTabName
     );

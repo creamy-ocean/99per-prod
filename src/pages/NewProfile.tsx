@@ -1,4 +1,3 @@
-import { useAuthContext } from "@/context/AuthContext";
 import {
   addProfile,
   checkIfProfileExists,
@@ -8,7 +7,7 @@ import {
   getStyles,
   updateProfile,
 } from "@/database/firebase";
-import { FormValues, Games } from "@/types/types";
+import { FormValues, Games, UserInterface } from "@/types/types";
 import {
   Alert,
   AlertIcon,
@@ -37,7 +36,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import imageCompression from "browser-image-compression";
 import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import { array, mixed, object, string } from "yup";
 
 const REG_EXP = /^((?![%=*><]).)*$/g;
@@ -99,10 +98,8 @@ const formSchema = object()
   .required();
 
 const NewProfile = () => {
-  const user = useAuthContext();
+  const user = useOutletContext<UserInterface>();
   const profile = useLocation().state?.profile;
-
-  if (!user) return;
 
   const [loading, setLoading] = useState<boolean>(true);
   const [currTab, setCurrTab] = useState<string>("친구");
@@ -219,6 +216,7 @@ const NewProfile = () => {
         await addProfile(currTab, user?.uid, formValues);
         setAlertMsg("프로필이 생성되었습니다");
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       setAlertMsg(e.message);
     }
@@ -498,8 +496,8 @@ const NewProfile = () => {
               {currTab === "친구"
                 ? "자기"
                 : currTab === "파티"
-                ? "파티"
-                : "길드"}{" "}
+                  ? "파티"
+                  : "길드"}{" "}
               소개
             </FormLabel>
             <Controller
@@ -511,8 +509,8 @@ const NewProfile = () => {
                     currTab === "친구"
                       ? "자기 소개를 입력해주세요"
                       : currTab === "파티"
-                      ? "파티 소개를 입력해주세요"
-                      : "길드 소개를 입력해주세요"
+                        ? "파티 소개를 입력해주세요"
+                        : "길드 소개를 입력해주세요"
                   }
                   value={value}
                   onChange={onChange}
@@ -528,8 +526,8 @@ const NewProfile = () => {
                 {currTab === "친구"
                   ? "친구"
                   : currTab === "파티"
-                  ? "파티원"
-                  : "길드원"}
+                    ? "파티원"
+                    : "길드원"}
                 들에게 소개해보세요
               </FormHelperText>
             )}

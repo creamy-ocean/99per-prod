@@ -120,9 +120,7 @@ const ProfileCard = ({
     setRequestId(null);
     setProfiles &&
       setProfiles((prev) => {
-        return prev.filter((p) => {
-          p.id !== profile.id;
-        });
+        return prev.filter((p) => p.id !== profile.id);
       });
   };
 

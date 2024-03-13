@@ -32,7 +32,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface NavLinkProps {
   children: {
@@ -71,6 +71,17 @@ const NavLink = ({ children }: NavLinkProps) => {
 const Header = ({ user }: { user: UserInterface }) => {
   const [notiList, setNotiList] = useState<Array<Noti>>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const navigate = useNavigate();
+
+  const onNotiClick = (notiId: string, notiTab: string) => {
+    readNotifications(notiId);
+    navigate("/myRequests", {
+      state: {
+        defaultRequestTab: "받은 요청",
+        defaultTypeTab: notiTab,
+      },
+    });
+  };
 
   const readNotifications = (notiId?: string) => {
     if (isArrayEmpty(notiList)) return;
@@ -143,7 +154,7 @@ const Header = ({ user }: { user: UserInterface }) => {
                 <PopoverArrow />
                 <PopoverCloseButton />
                 <PopoverHeader textAlign="center">알림</PopoverHeader>
-                <PopoverBody textAlign="center">
+                <PopoverBody textAlign="center" pr="0" pl="0">
                   {!isArrayEmpty(notiList) ? (
                     <Flex justify="center" mt="1">
                       <Button
@@ -170,7 +181,9 @@ const Header = ({ user }: { user: UserInterface }) => {
                           key={idx}
                           pt="1"
                           pb="1"
-                          onClick={() => readNotifications(noti.id)}
+                          cursor="pointer"
+                          _hover={{ backgroundColor: "#EAEEF2" }}
+                          onClick={() => onNotiClick(noti.id, noti.tab)}
                         >
                           새로운 {noti.tab} {msg} 요청이 있습니다
                         </ListItem>

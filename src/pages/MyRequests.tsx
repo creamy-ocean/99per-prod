@@ -19,32 +19,29 @@ import {
 } from "@chakra-ui/react";
 import ProfileCard from "@components/domain/ProfileCard";
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
+
+const requestTabs = ["보낸 요청", "받은 요청"];
+const typeTabs = ["친구", "파티", "길드"];
 
 const MyRequests = () => {
+  const { state } = useLocation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [firstTab, setFirstTab] = useState<string>("보낸 요청");
-  const [secondTab, setSecondTab] = useState<string>("친구");
+  const [requestTabIdx, setRequestTabIdx] = useState(0);
+  const [typeTabIdx, setTypeTabIdx] = useState(0);
   const [alert, setAlert] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const user = useOutletContext<UserInterface>();
 
   const fetchProfiles = async () => {
-    const changedFirstTabName = changeTabName(firstTab);
-    const changedSecondTabName = changeTabName(secondTab);
+    const changedRequestTabName = changeTabName(requestTabs[requestTabIdx]);
+    const changedTypeTabName = changeTabName(typeTabs[typeTabIdx]);
     const data = await getProfilesFromRequests(
       user.uid,
-      changedFirstTabName,
-      changedSecondTabName
+      changedRequestTabName,
+      changedTypeTabName
     );
-    setProfiles(data.filter((d) => d.tab === secondTab));
-  };
-
-  const changeTab = (type: string, e: React.MouseEvent<HTMLButtonElement>) => {
-    const eventTarget = e.target as HTMLButtonElement;
-    type === "requestType"
-      ? setFirstTab(eventTarget.innerText)
-      : setSecondTab(eventTarget.innerText);
+    setProfiles(data.filter((d) => d.tab === typeTabs[typeTabIdx]));
   };
 
   const approveRequest = (
@@ -65,11 +62,22 @@ const MyRequests = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
     setLoading(true);
     fetchProfiles();
     setLoading(false);
-  }, [firstTab, secondTab]);
+  }, [requestTabIdx, typeTabIdx]);
+
+  useEffect(() => {
+    if (!state) return;
+    setRequestTabIdx(() =>
+      requestTabs.findIndex(
+        (requestTab) => requestTab === state.defaultRequestTab
+      )
+    );
+    setTypeTabIdx(() =>
+      typeTabs.findIndex((typeTab) => typeTab === state.defaultTypeTab)
+    );
+  }, [state]);
 
   return (
     <Flex
@@ -88,17 +96,32 @@ const MyRequests = () => {
         내 요청
       </Heading>
       <Divider w="80%" mt="4" mb="8" />
-      <Tabs variant="soft-rounded" colorScheme="blue" mb="8" align="center">
+      <Tabs
+        variant="soft-rounded"
+        colorScheme="blue"
+        mb="8"
+        align="center"
+        index={requestTabIdx}
+        onChange={(idx) => setRequestTabIdx(idx)}
+      >
         <TabList>
-          <Tab onClick={(e) => changeTab("requestType", e)}>보낸 요청</Tab>
-          <Tab onClick={(e) => changeTab("requestType", e)}>받은 요청</Tab>
+          {requestTabs.map((tabName) => (
+            <Tab key={tabName}>{tabName}</Tab>
+          ))}
         </TabList>
       </Tabs>
-      <Tabs variant="soft-rounded" colorScheme="blue" mb="8" align="center">
+      <Tabs
+        variant="soft-rounded"
+        colorScheme="blue"
+        mb="8"
+        align="center"
+        index={typeTabIdx}
+        onChange={(idx) => setTypeTabIdx(idx)}
+      >
         <TabList>
-          <Tab onClick={(e) => changeTab("tabType", e)}>친구</Tab>
-          <Tab onClick={(e) => changeTab("tabType", e)}>파티</Tab>
-          <Tab onClick={(e) => changeTab("tabType", e)}>길드</Tab>
+          {typeTabs.map((tabName) => (
+            <Tab key={tabName}>{tabName}</Tab>
+          ))}
         </TabList>
       </Tabs>
       <Grid gap="2" w="80%">
@@ -113,8 +136,10 @@ const MyRequests = () => {
                 key={idx}
                 profile={profile}
                 user={user}
-                tab={secondTab}
-                isReceived={firstTab === "받은 요청" ? true : false}
+                tab={typeTabs[typeTabIdx]}
+                isReceived={
+                  requestTabs[requestTabIdx] === "받은 요청" ? true : false
+                }
                 approveRequest={approveRequest}
                 rejectRequest={rejectRequest}
                 setAlert={setAlert}

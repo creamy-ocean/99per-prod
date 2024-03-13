@@ -52,7 +52,8 @@ const Home = () => {
             display="inline-block"
             position="absolute"
             top="-2"
-            right="0"
+            right="3"
+            letterSpacing="1px"
           >
             '9'해요
           </Text>

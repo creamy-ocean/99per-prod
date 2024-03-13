@@ -1,22 +1,9 @@
-import { Box, Button, Flex, Heading, Image, Text } from "@chakra-ui/react";
-import { Variants, motion } from "framer-motion";
+import { Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
 import { IoArrowForwardOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import Typewriter from "typewriter-effect";
-
-const motionVariants: Variants = {
-  initial: {
-    y: 0,
-  },
-  animate: {
-    y: 10,
-    transition: {
-      repeat: Infinity,
-      duration: 1.25,
-      repeatType: "mirror",
-    },
-  },
-};
+import Lottie from "lottie-react";
+import homeAnimation from "@/animations/home_animation.json";
 
 const Home = () => {
   return (
@@ -33,13 +20,13 @@ const Home = () => {
                   .typeString(`다이아 봇듀`)
                   .pauseFor(1500)
                   .deleteAll()
-                  .typeString("검마 먹자팟")
-                  .pauseFor(1500)
-                  .deleteAll()
                   .typeString("배그 삼쿼드")
                   .pauseFor(1500)
                   .deleteAll()
                   .typeString("옵치 6인팟")
+                  .pauseFor(1500)
+                  .deleteAll()
+                  .typeString("넷맘 4인팟")
                   .pauseFor(1500)
                   .deleteAll()
                   .start();
@@ -52,7 +39,8 @@ const Home = () => {
             display="inline-block"
             position="absolute"
             top="-2"
-            right="0"
+            right="3"
+            letterSpacing="1px"
           >
             '9'해요
           </Text>
@@ -67,15 +55,7 @@ const Home = () => {
         </Link>
       </Flex>
       <Flex direction="column" justify="center">
-        <Image
-          as={motion.img}
-          src="/assets/iPhone_mockup.png"
-          alt="99프로 사용 예시 이미지"
-          w="32rem"
-          variants={motionVariants}
-          initial="initial"
-          animate="animate"
-        />
+        <Lottie animationData={homeAnimation} style={{ maxWidth: "40rem" }} />
       </Flex>
     </Flex>
   );

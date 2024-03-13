@@ -45,6 +45,7 @@ export const AuthContextProvider = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuthContext = () => {
   return useContext(AuthContext);
 };

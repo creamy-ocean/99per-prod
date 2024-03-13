@@ -2,8 +2,8 @@ import { extendTheme } from "@chakra-ui/react";
 
 const theme = extendTheme({
   fonts: {
-    heading: "Noto Sans KR",
-    body: "Noto Sans KR",
+    heading: "Pretendard-Regular",
+    body: "Pretendard-Medium",
   },
   colors: {
     brand: {

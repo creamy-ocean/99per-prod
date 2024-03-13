@@ -1,10 +1,9 @@
-import { useAuthContext } from "@/context/AuthContext";
 import {
   blockUser,
   deleteProfile,
   getProfilesFromRelationships,
 } from "@/database/firebase";
-import { Profile } from "@/types/types";
+import { Profile, UserInterface } from "@/types/types";
 import { changeTabName, isArrayEmpty } from "@/utils/functions";
 import {
   Alert,
@@ -20,14 +19,13 @@ import {
 } from "@chakra-ui/react";
 import ProfileCard from "@components/domain/ProfileCard";
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 
 const MyFriends = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currTab, setCurrTab] = useState<string>("친구");
   const [alert, setAlert] = useState<string>("");
-  const user = useAuthContext();
-
-  if (!user) return;
+  const user = useOutletContext<UserInterface>();
 
   const fetchProfiles = async () => {
     const changedTabName = changeTabName(currTab);

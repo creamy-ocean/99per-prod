@@ -29,7 +29,7 @@ import { Link } from "react-router-dom";
 
 interface ProfileProps {
   profile: Profile;
-  user: UserInterface | null;
+  user: UserInterface;
   tab: string;
   setAlert: Dispatch<SetStateAction<string>>;
   isOwner?: boolean;
@@ -69,8 +69,6 @@ const ProfileCard = ({
   blockUser,
   setProfiles,
 }: ProfileProps) => {
-  if (!user?.uid) return;
-
   const { id, userId, game, image, style, interest, intro } = profile;
   const [requestId, setRequestId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);

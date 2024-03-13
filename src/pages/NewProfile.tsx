@@ -259,10 +259,11 @@ const NewProfile = () => {
           )}
         </Tabs>
         <form id="profile-form" onSubmit={handleSubmit(onSubmit)}>
-          <label style={{ marginTop: "8", fontWeight: "bold", color: "#555" }}>
+          <label style={{ marginTop: "8", fontWeight: "bold", color: "#555"}}>
             게임
+            <span style={{color: '#E53E3E'}}> *</span>
           </label>
-          <Grid templateColumns="1fr 1fr">
+          <Grid templateColumns="1fr 1fr" mt='2'>
             <FormControl
               sx={{
                 select: { fontSize: "0.9rem" },
@@ -340,6 +341,7 @@ const NewProfile = () => {
               },
             }}
             isInvalid={!!errors?.interest}
+            isRequired
           >
             <FormLabel mt="8" fontWeight="bold" color="#555">
               관심사
@@ -374,6 +376,7 @@ const NewProfile = () => {
               },
             }}
             isInvalid={!!errors.style}
+            isRequired
           >
             <FormLabel mt="8" fontWeight="bold" color="#555">
               플레이 스타일
@@ -491,6 +494,7 @@ const NewProfile = () => {
               },
             }}
             isInvalid={!!errors?.intro}
+            isRequired
           >
             <FormLabel mt="8" fontWeight="bold" color="#555">
               {currTab === "친구"
@@ -539,6 +543,7 @@ const NewProfile = () => {
               },
             }}
             isInvalid={!!errors?.contact}
+            isRequired
           >
             <FormLabel mt="8" fontWeight="bold" color="#555">
               연락처

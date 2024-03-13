@@ -12,6 +12,7 @@ import {
   Button,
   Flex,
   HStack,
+  Heading,
   IconButton,
   List,
   ListItem,
@@ -111,7 +112,7 @@ const Header = ({ user }: { user: UserInterface }) => {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Box>로고</Box>
+            <Heading variant='logo'>99%</Heading>
             <HStack
               as={"nav"}
               spacing={4}

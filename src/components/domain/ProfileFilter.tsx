@@ -86,7 +86,7 @@ const ProfileFilter = ({
   return (
     <Flex direction="column" w="80%">
       <Box mb="4">
-        <Heading size="sm" mb="2">
+        <Heading size="sm" mb="2" color="#555">
           게임
         </Heading>
         <Grid templateColumns="4fr 6fr">
@@ -114,7 +114,7 @@ const ProfileFilter = ({
         </Grid>
       </Box>
       <Box mb="4">
-        <Heading size="sm" mb="2">
+        <Heading size="sm" mb="2" color="#555">
           관심사
         </Heading>
         {interests.map((interest, idx) => {
@@ -122,7 +122,7 @@ const ProfileFilter = ({
             <Tag
               key={idx}
               mr="1"
-              mt='1'
+              mt="1"
               style={{ cursor: "pointer" }}
               colorScheme={
                 filters.interest.includes(interest) ? "blue" : "gray"
@@ -136,7 +136,7 @@ const ProfileFilter = ({
         <Box></Box>
       </Box>
       <Box mb="4">
-        <Heading size="sm" mb="2">
+        <Heading size="sm" mb="2" color="#555">
           플레이 스타일
         </Heading>
         {styles.map((style, idx) => {
@@ -144,7 +144,7 @@ const ProfileFilter = ({
             <Tag
               key={idx}
               mr="1"
-              mt='1'
+              mt="1"
               style={{ cursor: "pointer" }}
               colorScheme={filters.style.includes(style) ? "blue" : "gray"}
               onClick={() => onTagSelect("style", style)}

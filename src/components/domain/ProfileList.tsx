@@ -1,10 +1,5 @@
-import { useAuthContext } from "@/context/AuthContext";
-import {
-  getBlockedUsers,
-  getProfiles,
-  getRelativeProfileIds,
-} from "@/database/firebase";
-import { Filters } from "@/types/types";
+import { getBlockedUsers, getRelativeProfileIds } from "@/database/firebase";
+import { Filters, UserInterface } from "@/types/types";
 import { changeTabName } from "@/utils/functions";
 import {
   Alert,
@@ -15,17 +10,16 @@ import {
   Heading,
   Text,
 } from "@chakra-ui/react";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { DocumentData } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
+import ProfileFilter from "./ProfileFilter";
+import { useOutletContext } from "react-router-dom";
 import { MoonLoader } from "react-spinners";
 import ProfileCard from "./ProfileCard";
-import ProfileFilter from "./ProfileFilter";
+import useProfilesInfiniteQuery from "@/hooks/useProfilesInfiniteQuery";
 
 const ProfileList = ({ tab }: { tab: string }) => {
-  const user = useAuthContext();
-
-  if (!user) return;
+  const user = useOutletContext<UserInterface>();
 
   const [filters, setFilters] = useState<Filters>({
     game: [],
@@ -37,9 +31,6 @@ const ProfileList = ({ tab }: { tab: string }) => {
   const [relativeProfileIds, setRelativeProfileIds] = useState<Array<string>>(
     []
   );
-  const [lastProfile, setLastProfile] = useState<DocumentData | null>(null);
-
-  const profileLimit = 6;
   const bottom = useRef(null);
   const changedTabName = changeTabName(tab);
 
@@ -65,57 +56,13 @@ const ProfileList = ({ tab }: { tab: string }) => {
   };
 
   const { data, isError, isLoading, hasNextPage, fetchNextPage } =
-    useInfiniteQuery({
-      queryKey: ["profiles"],
-      queryFn: (pageParam) => {
-        return getProfiles(
-          false,
-          changedTabName,
-          user.uid,
-          pageParam.pageParam
-        );
-      },
-      select: (data) =>
-        data.pages.flatMap((snapshot) => {
-          const filtered = isFiltersEmpty
-            ? snapshot.docs
-            : snapshot.docs.filter((doc) => {
-                return checkIfDocumentMatchesFilters(doc.data());
-              });
-          return filtered.map((doc) => {
-            const {
-              userId,
-              game,
-              genre,
-              style,
-              interest,
-              image,
-              intro,
-              contact,
-            } = doc.data();
-            return {
-              id: doc.id,
-              userId,
-              genre,
-              tab: changeTabName(tab),
-              game,
-              style,
-              interest,
-              image,
-              intro,
-              contact,
-            };
-          });
-        }),
-      initialPageParam: lastProfile,
-      getNextPageParam: (querySnapshot) => {
-        if (querySnapshot.size < profileLimit) {
-          return undefined;
-        } else {
-          return querySnapshot.docs[querySnapshot.docs.length - 1];
-        }
-      },
-    });
+    useProfilesInfiniteQuery(
+      false,
+      tab,
+      user.uid,
+      isFiltersEmpty,
+      checkIfDocumentMatchesFilters
+    );
 
   if (isError) {
     setAlert("프로필 목록을 불러오는 중 오류가 발생했습니다 새로고침 해주세요");

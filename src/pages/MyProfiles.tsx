@@ -122,9 +122,9 @@ const MyProfiles = () => {
   return (
     <Flex
       backgroundColor="#fff"
-      w="80%"
+      w={{sm: "100%", md: "80%"}}
       maxW="40rem"
-      p="2"
+      p={{sm:"0", md:'2'}}
       pb="6"
       mt="6"
       mb="6"
@@ -143,7 +143,7 @@ const MyProfiles = () => {
           <Tab onClick={changeTab}>길드</Tab>
         </TabList>
       </Tabs>
-      <Grid gap="2" w="80%">
+      <Grid gap="2" w={{sm:"90%", md:"80%"}}>
         {isLoading && (
           <Flex justify="center">
             <MoonLoader

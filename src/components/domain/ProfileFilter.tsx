@@ -24,7 +24,7 @@ const ProfileFilter = ({
   const [interests, setInterests] = useState<Array<string>>([]);
 
   const gameList =
-    genre === "all" ? ["게임 장르를 선택해주세요"] : games[genre];
+    genre === "all" ? ["장르를 선택해주세요"] : games[genre];
 
   const getFilters = async () => {
     const genres = await getGenres();
@@ -95,7 +95,7 @@ const ProfileFilter = ({
             style={{ cursor: "pointer" }}
             onChange={onGenreSelect}
           >
-            <option value="all">게임 장르</option>
+            <option value="all">장르</option>
             {genres &&
               genres.map((genre, idx) => {
                 return (

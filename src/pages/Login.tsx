@@ -11,8 +11,9 @@ const Login = () => {
       direction="column"
       justify="center"
       alignItems="center"
-      w="30rem"
+      w={{md: "50%", sm:'80%'}}
       h="25rem"
+      maxW='40rem'
       backgroundColor="#E6F2FD"
       borderRadius="3xl"
       boxShadow="2xl"

@@ -103,7 +103,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
   return (
     <Flex
       backgroundColor="#fff"
-      w="80%"
+      w={{sm:'100%', md:"80%"}}
       maxW="40rem"
       p="2"
       pb="6"
@@ -113,7 +113,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
       align="center"
       borderRadius="xl"
     >
-      <Heading fontSize="3xl" color="#555" pt="6" pb="4">
+      <Heading fontSize={{sm: '2xl',md:"3xl"}} color="#555" pt="6" pb="4" textAlign='center'>
         나와 잘 맞는 {tab}를 찾아보세요
       </Heading>
       <Divider w="80%" mt="4" mb="8" />

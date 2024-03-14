@@ -112,7 +112,7 @@ const Header = ({ user }: { user: UserInterface }) => {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Heading variant='logo'>99%</Heading>
+            <Link to='/'><Heading variant='logo'>99%</Heading></Link>
             <HStack
               as={"nav"}
               spacing={4}

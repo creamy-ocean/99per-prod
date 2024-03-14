@@ -231,11 +231,11 @@ const NewProfile = () => {
   return (
     <Flex
       direction="column"
-      px="12"
+      px={{sm:"2", md:"12"}}
       pt="4"
       pb="8"
       my="8"
-      w="80%"
+      w={{sm: '100%', md: "80%"}}
       maxW="40rem"
       backgroundColor="white"
       borderRadius="xl"

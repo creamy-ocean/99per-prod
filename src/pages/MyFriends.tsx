@@ -75,9 +75,9 @@ const MyFriends = () => {
   return (
     <Flex
       backgroundColor="#fff"
-      w="80%"
+      w={{sm:"100%", md:"80%"}}
       maxW="40rem"
-      p="2"
+      p={{sm:'0', md:"2"}}
       mt="6"
       mb="6"
       pb="6"
@@ -96,7 +96,7 @@ const MyFriends = () => {
           <Tab onClick={changeTab}>길드</Tab>
         </TabList>
       </Tabs>
-      <Grid gap="2" w="80%">
+      <Grid gap="2" w={{sm:"90%", md:"80%"}}>
         {isArrayEmpty(profiles) ? (
           <Text textAlign="center">프로필이 존재하지 않습니다</Text>
         ) : (

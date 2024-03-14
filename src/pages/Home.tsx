@@ -1,4 +1,11 @@
-import { Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Text,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import { IoArrowForwardOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import Typewriter from "typewriter-effect";
@@ -6,9 +13,22 @@ import Lottie from "lottie-react";
 import homeAnimation from "@/animations/home_animation.json";
 
 const Home = () => {
+  const [isLargerThan320] = useMediaQuery("(min-width: 320px)");
+  const [isLargerThan768] = useMediaQuery("(min-width: 768px)");
+
   return (
-    <Flex h="100%" w="80vw" justify="space-evenly">
-      <Flex direction="column" justify="center" alignItems="start">
+    <Flex
+      h="100%"
+      w="80vw"
+      justify={{ sm: "center", md: "space-evenly" }}
+      flexDir={{ sm: "column", md: "row" }}
+    >
+      <Flex
+        direction="column"
+        justify="center"
+        alignItems="start"
+        pl={{ sm: "2" }}
+      >
         <Heading variant="logo" size="3xl" mb="4rem">
           99%
         </Heading>
@@ -35,11 +55,11 @@ const Home = () => {
             />
           </Box>
           <Text
-            fontSize="5xl"
+            fontSize={{ sm: "4xl", md: "5xl" }}
             display="inline-block"
             position="absolute"
-            top="-2"
-            right="3"
+            top={{ sm: "-1.5", md: "-2" }}
+            right={{ sm: "20", md: "3" }}
             letterSpacing="1px"
           >
             '9'해요
@@ -55,7 +75,16 @@ const Home = () => {
         </Link>
       </Flex>
       <Flex direction="column" justify="center">
-        <Lottie animationData={homeAnimation} style={{ maxWidth: "40rem" }} />
+        <Lottie
+          animationData={homeAnimation}
+          style={
+            isLargerThan768
+              ? { maxWidth: "40rem" }
+              : isLargerThan320
+                ? { maxWidth: "25rem" }
+                : { maxWidth: "15rem" }
+          }
+        />
       </Flex>
     </Flex>
   );

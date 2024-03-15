@@ -1,7 +1,6 @@
 import App from "@/App";
 import { ChakraProvider } from "@chakra-ui/react";
 import "@fontsource/luckiest-guy";
-import "@fontsource/noto-sans-kr";
 import "@fontsource/roboto";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as ReactDOM from "react-dom/client";

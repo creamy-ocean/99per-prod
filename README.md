@@ -1,24 +1,26 @@
-# 99%(99퍼센트) - 작업 중(미완성)
+# 99%(99퍼센트)
 
-> 나와 딱 맞는 게임 친구 찾기
+> 여성 게이머 전용 1:1 매칭 서비스
 > 
 <br/>
    
 ## 프로젝트 소개
 
 - 게임을 함께 플레이할 게임 친구를 찾을 수 있는 웹 사이트입니다<br/>
-- 플레이하는 게임, 플레이 스타일, 관심사 등의 필터링을 통해 나와 딱 맞는 게임 친구를 찾을 수 있습니다
+- 플레이하는 게임, 플레이 스타일, 관심사 등의 필터링을 통해 나와 딱 맞는 게임 친구, 파티, 길드를 찾을 수 있습니다
+
+  ![99%_설명](https://github.com/creamy-ocean/99per-ver.2/assets/93719660/a4dad48f-8403-4e47-a983-3a8c8c1818c4)
 <br/>
 
 ## 실행 화면
 
-![Honeycam 2023-11-29 14-15-38](https://github.com/creamy-ocean/99per-ver.2/assets/93719660/211abfe1-28c9-4c33-a889-85dcd74099f1)
+![Honeycam 2024-03-18 02-49-25](https://github.com/creamy-ocean/99per-ver.2/assets/93719660/013ef8c7-a2ff-487b-bdc7-38cf18e9e1b0)
 <br/>
 <br/>
 
-## 배포 링크 및 서버 주소
+## 배포 링크
 
-- 배포 링크: [https://99per-prod.netlify.app/](https://99per-prod.netlify.app/)
+- 배포 링크: [https://99per.site](https://99per.site)
   <br/>
 <br/>
 
@@ -80,11 +82,12 @@
   - 로그인 되어 있지 않거나 인증을 받지 않은 상태의 경우 특정 페이지에 접근 불가
 <br/>
 
+### 무한 스크롤
+- React Query의 useInfiniteScroll을 사용하여 프로필 목록에 무한 스크롤 적용 및 캐싱 적용
+- 필터 변경 시 프로필 목록 데이터를 다시 가져오지 않고 필터링 되도록 구현
+
 ## 개선해야 하는 점
-- 현재 친구, 파티, 길드 탭 이동 시 프로필 목록 데이터를 다시 불러오는데, 부하가 발생할 수 있는 부분이므로 React Query를 사용해 캐싱 하는 방향으로 개선 필요
-- Profiles state이 이미 존재하면 프로필 목록 데이터를 다시 불러오지 않고 filter 함수를 사용해 필터링 되도록 개선 필요
 - 접근성 관련 UI, UX 개선 필요(색상 대비율, 버튼 이름 등)
-- 프로필 목록에서 게임 이름이 표시되도록 개선 필요
 <br/>
 
 ## 기술 스택
@@ -95,5 +98,6 @@
   <img src="https://img.shields.io/badge/Chakra UI-319795?style=flat&logo=chakraui&logoColor=white">
   <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=white">
    <img src="https://img.shields.io/badge/React Hook Form-EC5990?style=flat&logo=reacthookform&logoColor=white">
+   <img src="https://img.shields.io/badge/React Query-FF4154?style=flat&logo=reactquery&logoColor=white">
 </div>
 <br/>

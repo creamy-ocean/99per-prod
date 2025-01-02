@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "per-fbdcf"
-  }
+    "default": "per-test-d58a1",
+    "testing": "per-test-d58a1"
+  },
+  "targets": {},
+  "etags": {}
 }

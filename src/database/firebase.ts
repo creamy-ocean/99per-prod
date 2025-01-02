@@ -39,7 +39,6 @@ import { Dispatch, SetStateAction } from "react";
 const firebaseConfig = {
   apiKey: config.firebase.apiKey,
   authDomain: config.firebase.authDomain,
-  databaseURL: config.firebase.databaseURL,
   projectId: config.firebase.projectId,
   storageBucket: config.firebase.storageBucket,
 };

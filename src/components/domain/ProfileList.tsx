@@ -19,6 +19,7 @@ import ProfileCard from "./ProfileCard";
 import useProfilesInfiniteQuery from "@/hooks/useProfilesInfiniteQuery";
 
 const ProfileList = ({ tab }: { tab: string }) => {
+
   const user = useOutletContext<UserInterface>();
 
   const [filters, setFilters] = useState<Filters>({
@@ -31,6 +32,9 @@ const ProfileList = ({ tab }: { tab: string }) => {
   const [relativeProfileIds, setRelativeProfileIds] = useState<Array<string>>(
     []
   );
+
+  console.log(filters, alert, blockedUsers, relativeProfileIds);
+
   const bottom = useRef(null);
   const changedTabName = changeTabName(tab);
 
@@ -65,7 +69,7 @@ const ProfileList = ({ tab }: { tab: string }) => {
     );
 
   if (isError) {
-    setAlert("프로필 목록을 불러오는 중 오류가 발생했습니다 새로고침 해주세요");
+    // setAlert("프로필 목록을 불러오는 중 오류가 발생했습니다 새로고침 해주세요");
   }
 
   const preset = async () => {
